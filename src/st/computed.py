@@ -18,6 +18,9 @@ class Computed[T]:
         track_dependency(self)
         return self._value
 
+    def _peek(self) -> T:
+        return self._value
+
     def _recompute(self) -> None:
         value = self._function()
         if self._initialized and value == self._value:

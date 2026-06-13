@@ -11,6 +11,9 @@ class State[T]:
         track_dependency(self)
         return self._value
 
+    def _peek(self) -> T:
+        return self._value
+
     @value.setter
     def value(self, value: T) -> None:
         if value == self._value:

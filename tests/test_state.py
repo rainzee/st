@@ -1,4 +1,4 @@
-from st import State, computed, effect
+from st import State, computed, effect, peek
 
 
 def test_state_exposes_initial_value(state: State[int]) -> None:
@@ -81,3 +81,27 @@ def test_computed_can_depend_on_another_computed() -> None:
     count.value = 2
 
     assert message.value == "double=4"
+
+
+def test_peek_reads_state_without_tracking_dependency() -> None:
+    state = State(1)
+    values: list[int] = []
+
+    effect(lambda: values.append(peek(state)))
+
+    state.value = 2
+
+    assert values == [1]
+
+
+def test_peek_reads_computed_without_tracking_dependency() -> None:
+    count = State(1)
+    double = computed(lambda: count.value * 2)
+    values: list[int] = []
+
+    effect(lambda: values.append(peek(double)))
+
+    count.value = 2
+
+    assert values == [2]
+    assert peek(double) == 4

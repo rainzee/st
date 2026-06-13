@@ -13,6 +13,10 @@ class EffectLike(Protocol):
     def _depend_on(self, dependency: Dependency) -> None: ...
 
 
+class Peekable[T](Protocol):
+    def _peek(self) -> T: ...
+
+
 _active_effects: list[EffectLike] = []
 
 
@@ -27,3 +31,7 @@ def push_effect(effect: EffectLike) -> None:
 
 def pop_effect() -> None:
     _active_effects.pop()
+
+
+def peek[T](value: Peekable[T]) -> T:
+    return value._peek()
