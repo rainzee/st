@@ -2,9 +2,14 @@
 
 Minimal reactive state for Python.
 
-`State` stores a value. `effect` tracks every state read during execution and
-reruns when those dependencies change. `computed` derives read-only state from
-other state. `peek` reads without tracking.
+## Design
+
+- Small core. No runtime dependencies.
+- Signal-first model. State, derived state, and effects form the primitive graph.
+- Structural typing. Internal contracts use `Protocol`, not inheritance.
+- Python 3.13 generics. `State[T]` and `Computed[T]` use PEP 695 syntax.
+- Dynamic dependencies. Effects replace their dependency set on each run.
+- Equality short-circuit. Unchanged values do not notify dependents.
 
 ## Usage
 
