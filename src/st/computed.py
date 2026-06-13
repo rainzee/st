@@ -5,7 +5,11 @@ from st.runtime import EffectLike, track_dependency
 
 
 class Computed[T]:
+    """Read-only state derived from reactive dependencies."""
+
     def __init__(self, function: Callable[[], T]) -> None:
+        """Create a computed value from a pure derivation function."""
+
         self._function = function
         self._effects: set[EffectLike] = set()
         self._initialized = False
@@ -15,6 +19,11 @@ class Computed[T]:
 
     @property
     def value(self) -> T:
+        """Current derived value.
+
+        Reads are tracked when an effect or another computed value is active.
+        """
+
         track_dependency(self)
         return self._value
 
@@ -39,4 +48,6 @@ class Computed[T]:
 
 
 def computed[T](function: Callable[[], T]) -> Computed[T]:
+    """Create a read-only derived state."""
+
     return Computed(function)

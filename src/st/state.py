@@ -2,12 +2,22 @@ from st.runtime import EffectLike, track_dependency
 
 
 class State[T]:
+    """Mutable reactive state."""
+
     def __init__(self, value: T) -> None:
+        """Create state with an initial value."""
+
         self._value = value
         self._effects: set[EffectLike] = set()
 
     @property
     def value(self) -> T:
+        """Current value.
+
+        Reads are tracked when an effect or computed value is active.
+        Writes notify dependents when the value changes.
+        """
+
         track_dependency(self)
         return self._value
 

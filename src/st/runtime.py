@@ -34,4 +34,6 @@ def pop_effect() -> None:
 
 
 def peek[T](value: Peekable[T]) -> T:
+    """Read a reactive value without tracking it as a dependency."""
+
     return value._peek()
