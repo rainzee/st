@@ -26,6 +26,29 @@ Output:
 4
 ```
 
+## Roadmap
+
+Core infrastructure:
+
+- `dispose`
+- `untrack`
+- `peek`
+- `batch`
+- `on_cleanup`
+
+Scheduling:
+
+- custom effect schedulers
+- queued flush
+- `next_tick`
+
+Debugging:
+
+- runtime type guards
+- dependency inspection
+- subscriber inspection
+- optional labels
+
 ## Development
 
 ```shell
