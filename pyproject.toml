@@ -1,7 +1,7 @@
 [project]
 name = "st"
 version = "0.4.0"
-description = "Add your description here"
+description = "A small, typed reactive state runtime for Python with explicit ownership and deterministic updates."
 readme = "README.md"
 authors = [
     { name = "rainzee", email = "rainzee.w@gmail.com" }

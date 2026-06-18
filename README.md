@@ -11,6 +11,22 @@ Minimal reactive state for Python.
 - Dynamic dependencies. Effects replace their dependency set on each run.
 - Equality short-circuit. Unchanged values do not notify dependents.
 
+## API
+
+| API | Purpose |
+| --- | --- |
+| `state(value, *, equals=...)` | Create mutable reactive state. |
+| `computed(fn)` | Create lazy derived state. |
+| `effect(fn)` | Run a side effect with automatic dependency tracking. |
+| `watch(source, callback, *, immediate=False)` | Watch an explicit source with `new`, `old`, and optional cleanup. |
+| `readonly(value)` | Expose a read-only view of state or computed state. |
+| `batch()` | Coalesce updates and flush effects once. |
+| `untrack()` | Read reactive values without collecting dependencies. |
+| `peek(value)` | Read a reactive value without tracking. |
+| `scope()` | Own effects, computed values, watchers, and cleanup callbacks. |
+| `on_cleanup(fn)` | Register cleanup on the current effect or scope. |
+| `dispose(value)` | Stop a disposable reactive resource. |
+
 ## Usage
 
 ### State
