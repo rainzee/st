@@ -40,6 +40,19 @@ count.value = 2
 assert double.value == 4
 ```
 
+### Read-only views
+
+```python
+from st import readonly, state
+
+count = state(1)
+public_count = readonly(count)
+
+count.value = 2
+
+assert public_count.value == 2
+```
+
 ### Effects
 
 ```python
