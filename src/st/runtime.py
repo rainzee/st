@@ -42,6 +42,9 @@ def pop_effect() -> None:
 
 
 def schedule_effect(effect: EffectLike) -> None:
+    if effect in _active_effects:
+        return
+
     if _batch_depth > 0 or _is_flushing:
         _pending_effects.add(effect)
         return

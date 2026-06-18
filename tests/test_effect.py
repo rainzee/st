@@ -44,3 +44,32 @@ def test_effect_tracks_computed_dependency() -> None:
     count.value = 2
 
     assert values == [2, 4]
+
+
+def test_effect_does_not_recurse_when_it_updates_a_dependency() -> None:
+    state = State(0)
+    values: list[int] = []
+
+    def increment_dependency() -> None:
+        values.append(state.value)
+        state.value += 1
+
+    effect(increment_dependency)
+
+    assert values == [0]
+    assert state.value == 1
+
+
+def test_effect_that_updates_a_dependency_still_responds_to_external_updates() -> None:
+    state = State(0)
+    values: list[int] = []
+
+    def increment_dependency() -> None:
+        values.append(state.value)
+        state.value += 1
+
+    effect(increment_dependency)
+    state.value = 10
+
+    assert values == [0, 10]
+    assert state.value == 11
