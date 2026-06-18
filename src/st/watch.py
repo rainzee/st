@@ -1,6 +1,6 @@
 from collections.abc import Callable
 from inspect import Parameter, signature
-from typing import Protocol, cast, overload
+from typing import Protocol, TypeIs, cast, overload
 
 from st.runtime import Cleanup, Dependency, _pause_tracking, _restore_tracking, pop_effect, push_effect, run_cleanups
 from st.scope import register_disposable
@@ -30,14 +30,21 @@ class Watch[T]:
         immediate: bool = False,
     ) -> None:
         self._source = source
-        self._callback = callback
+        self._callback: WatchCallback[T] | None
+        self._callback_with_cleanup: WatchCallbackWithCleanup[T] | None
+        if _accepts_cleanup(callback):
+            self._callback = None
+            self._callback_with_cleanup = callback
+        else:
+            self._callback = callback
+            self._callback_with_cleanup = None
+
         self._immediate = immediate
         self._dependencies: set[Dependency] = set()
         self._cleanups: list[Cleanup] = []
         self._disposed = False
         self._initialized = False
         self._value: T | object = _UNSET
-        self._passes_cleanup = _accepts_cleanup(callback)
         self._priority = 1
 
     def __call__(self) -> None:
@@ -87,12 +94,14 @@ class Watch[T]:
 
         active_effects = _pause_tracking()
         try:
-            if self._passes_cleanup:
-                callback = self._callback
-                callback(value, old, self._add_cleanup)  # type: ignore[misc]
-            else:
-                callback = self._callback
-                callback(value, old)  # type: ignore[misc]
+            callback_with_cleanup = self._callback_with_cleanup
+            if callback_with_cleanup is not None:
+                callback_with_cleanup(value, old, self._add_cleanup)
+                return
+
+            callback = self._callback
+            if callback is not None:
+                callback(value, old)
         finally:
             _restore_tracking(active_effects)
 
@@ -154,7 +163,7 @@ def watch[T](
     return watcher
 
 
-def _accepts_cleanup(callback: Callable[..., object]) -> bool:
+def _accepts_cleanup[T](callback: WatchCallback[T] | WatchCallbackWithCleanup[T]) -> TypeIs[WatchCallbackWithCleanup[T]]:
     try:
         parameters = signature(callback).parameters.values()
     except (TypeError, ValueError):
