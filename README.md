@@ -27,6 +27,14 @@ Minimal reactive state for Python.
 | `on_cleanup(fn)` | Register cleanup on the current effect or scope. |
 | `dispose(value)` | Stop a disposable reactive resource. |
 
+## Examples
+
+- [Shopping cart](examples/shopping_cart.py): cart totals, coupons, checkout validation, scoped cleanup, and batched updates.
+
+```shell
+uv run python examples/shopping_cart.py
+```
+
 ## Usage
 
 ### State
