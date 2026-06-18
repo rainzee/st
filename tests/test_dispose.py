@@ -1,3 +1,6 @@
+import gc
+import weakref
+
 from st import State, computed, dispose, effect
 
 
@@ -22,6 +25,42 @@ def test_dispose_effect_is_idempotent() -> None:
     state.value = 2
 
     assert values == [1]
+
+
+def test_effect_is_kept_alive_by_dependency_until_disposed() -> None:
+    state = State(1)
+    effect_ = effect(lambda: state.value)
+    effect_ref = weakref.ref(effect_)
+
+    del effect_
+    gc.collect()
+
+    assert effect_ref() is not None
+
+
+def test_dispose_allows_effect_to_be_collected_while_dependency_lives() -> None:
+    state = State(1)
+    effect_ = effect(lambda: state.value)
+    effect_ref = weakref.ref(effect_)
+
+    dispose(effect_)
+    del effect_
+    gc.collect()
+
+    assert effect_ref() is None
+
+
+def test_unreachable_state_effect_cycle_is_collected() -> None:
+    def create_cycle() -> tuple[weakref.ReferenceType[State[int]], weakref.ReferenceType]:
+        state = State(1)
+        effect_ = effect(lambda: state.value)
+        return weakref.ref(state), weakref.ref(effect_)
+
+    state_ref, effect_ref = create_cycle()
+    gc.collect()
+
+    assert state_ref() is None
+    assert effect_ref() is None
 
 
 def test_dispose_stops_computed_recomputation() -> None:
