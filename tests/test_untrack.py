@@ -12,6 +12,21 @@ def test_untrack_reads_state_without_tracking_dependency() -> None:
     assert values == [1]
 
 
+def test_untrack_context_reads_state_without_tracking_dependency() -> None:
+    state = State(1)
+    values: list[int] = []
+
+    def collect() -> None:
+        with untrack():
+            value = state.value
+        values.append(value)
+
+    effect(collect)
+    state.value = 2
+
+    assert values == [1]
+
+
 def test_untrack_returns_callback_value() -> None:
     state = State(1)
 
@@ -27,6 +42,23 @@ def test_untrack_restores_tracking_after_callback() -> None:
 
     effect(lambda: values.append((untrack(lambda: first.value), second.value)))
 
+    first.value = 2
+    second.value = 11
+
+    assert values == [(1, 10), (2, 11)]
+
+
+def test_untrack_context_restores_tracking_after_block() -> None:
+    first = State(1)
+    second = State(10)
+    values: list[tuple[int, int]] = []
+
+    def collect() -> None:
+        with untrack():
+            first_value = first.value
+        values.append((first_value, second.value))
+
+    effect(collect)
     first.value = 2
     second.value = 11
 

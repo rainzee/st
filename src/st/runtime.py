@@ -28,6 +28,26 @@ _pending_effects: set[EffectLike] = set()
 _is_flushing = False
 
 
+class _UntrackContext:
+    def __init__(self) -> None:
+        self._active_effects: list[EffectLike] = []
+
+    def __enter__(self) -> None:
+        self._active_effects = _active_effects.copy()
+        _active_effects.clear()
+
+    def __exit__(self, *args: object) -> None:
+        _active_effects[:] = self._active_effects
+
+
+class _BatchContext:
+    def __enter__(self) -> None:
+        _begin_batch()
+
+    def __exit__(self, *args: object) -> None:
+        _end_batch()
+
+
 def track_dependency(dependency: Dependency) -> None:
     if _active_effects:
         _active_effects[-1]._depend_on(dependency)
@@ -68,35 +88,46 @@ def _flush_effects() -> None:
         _is_flushing = False
 
 
+def _begin_batch() -> None:
+    global _batch_depth
+
+    _batch_depth += 1
+
+
+def _end_batch() -> None:
+    global _batch_depth
+
+    _batch_depth -= 1
+    if _batch_depth == 0:
+        _flush_effects()
+
+
 def peek[T](value: Peekable[T]) -> T:
     """Read a reactive value without tracking it as a dependency."""
 
     return value._peek()
 
 
-def untrack[T](function: Callable[[], T]) -> T:
-    """Run a function without tracking reactive reads as dependencies."""
+def untrack[T](function: Callable[[], T] | None = None) -> T | _UntrackContext:
+    """Disable dependency tracking for a function or context block."""
 
-    active_effects = _active_effects.copy()
-    _active_effects.clear()
-    try:
+    context = _UntrackContext()
+    if function is None:
+        return context
+
+    with context:
         return function()
-    finally:
-        _active_effects[:] = active_effects
 
 
-def batch[T](function: Callable[[], T]) -> T:
-    """Run a function and defer reactive updates until it completes."""
+def batch[T](function: Callable[[], T] | None = None) -> T | _BatchContext:
+    """Defer reactive updates for a function or context block."""
 
-    global _batch_depth
+    context = _BatchContext()
+    if function is None:
+        return context
 
-    _batch_depth += 1
-    try:
+    with context:
         return function()
-    finally:
-        _batch_depth -= 1
-        if _batch_depth == 0:
-            _flush_effects()
 
 
 def dispose(value: Disposable) -> None:

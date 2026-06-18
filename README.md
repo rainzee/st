@@ -63,7 +63,12 @@ from st import effect, peek, state, untrack
 count = state(1)
 values: list[int] = []
 
-effect(lambda: values.append(untrack(lambda: count.value)))
+def collect() -> None:
+    with untrack():
+        value = count.value
+    values.append(value)
+
+effect(collect)
 
 count.value = 2
 
@@ -81,11 +86,9 @@ values: list[int] = []
 
 effect(lambda: values.append(count.value))
 
-def update() -> None:
+with batch():
     count.value = 2
     count.value = 3
-
-batch(update)
 
 assert values == [1, 3]
 ```

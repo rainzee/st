@@ -14,6 +14,18 @@ def test_batch_defers_effect_until_callback_completes() -> None:
     assert values == [1, 2]
 
 
+def test_batch_context_defers_effect_until_block_completes() -> None:
+    state = State(1)
+    values: list[int] = []
+    effect(lambda: values.append(state.value))
+
+    with batch():
+        state.value = 2
+        assert values == [1]
+
+    assert values == [1, 2]
+
+
 def test_batch_coalesces_multiple_updates_to_one_effect_run() -> None:
     state = State(1)
     values: list[int] = []
@@ -35,7 +47,8 @@ def test_nested_batch_flushes_after_outer_batch_completes() -> None:
 
     def update() -> None:
         state.value = 2
-        batch(lambda: _set_and_return(state, 3, None))
+        with batch():
+            state.value = 3
         assert values == [1]
 
     batch(update)
@@ -54,6 +67,19 @@ def test_batch_flushes_when_callback_raises() -> None:
 
     with pytest.raises(RuntimeError, match="boom"):
         batch(update)
+
+    assert values == [1, 2]
+
+
+def test_batch_context_flushes_when_block_raises() -> None:
+    state = State(1)
+    values: list[int] = []
+    effect(lambda: values.append(state.value))
+
+    with pytest.raises(RuntimeError, match="boom"):
+        with batch():
+            state.value = 2
+            raise RuntimeError("boom")
 
     assert values == [1, 2]
 
