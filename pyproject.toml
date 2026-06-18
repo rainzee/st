@@ -1,6 +1,6 @@
 [project]
 name = "st"
-version = "0.4.0"
+version = "0.5.0"
 description = "A small, typed reactive state runtime for Python with explicit ownership and deterministic updates."
 readme = "README.md"
 authors = [
