@@ -15,6 +15,7 @@ class Computed[T]:
         self._initialized = False
         self._value: T
         self._effect = Effect(self._recompute)
+        self._disposed = False
         self._effect()
 
     @property
@@ -24,7 +25,8 @@ class Computed[T]:
         Reads are tracked when an effect or another computed value is active.
         """
 
-        track_dependency(self)
+        if not self._disposed:
+            track_dependency(self)
         return self._value
 
     def _peek(self) -> T:
@@ -41,10 +43,21 @@ class Computed[T]:
             effect()
 
     def _subscribe(self, effect: EffectLike) -> None:
+        if self._disposed:
+            return
+
         self._effects.add(effect)
 
     def _unsubscribe(self, effect: EffectLike) -> None:
         self._effects.discard(effect)
+
+    def _dispose(self) -> None:
+        if self._disposed:
+            return
+
+        self._disposed = True
+        self._effect._dispose()
+        self._effects.clear()
 
 
 def computed[T](function: Callable[[], T]) -> Computed[T]:

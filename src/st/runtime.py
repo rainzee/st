@@ -17,6 +17,10 @@ class Peekable[T](Protocol):
     def _peek(self) -> T: ...
 
 
+class Disposable(Protocol):
+    def _dispose(self) -> None: ...
+
+
 _active_effects: list[EffectLike] = []
 
 
@@ -37,3 +41,9 @@ def peek[T](value: Peekable[T]) -> T:
     """Read a reactive value without tracking it as a dependency."""
 
     return value._peek()
+
+
+def dispose(value: Disposable) -> None:
+    """Stop a reactive value from receiving future updates."""
+
+    value._dispose()

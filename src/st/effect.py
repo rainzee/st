@@ -11,9 +11,13 @@ class Effect:
 
         self._function = function
         self._dependencies: set[Dependency] = set()
+        self._disposed = False
 
     def __call__(self) -> None:
         """Run the effect and replace its tracked dependencies."""
+
+        if self._disposed:
+            return
 
         for dependency in self._dependencies:
             dependency._unsubscribe(self)
@@ -31,6 +35,15 @@ class Effect:
 
         self._dependencies.add(dependency)
         dependency._subscribe(self)
+
+    def _dispose(self) -> None:
+        if self._disposed:
+            return
+
+        self._disposed = True
+        for dependency in self._dependencies:
+            dependency._unsubscribe(self)
+        self._dependencies.clear()
 
 
 def effect(function: Callable[[], None]) -> Effect:

@@ -37,7 +37,7 @@ Output:
 
 Core infrastructure:
 
-- `dispose`
+- `dispose` (done)
 - `untrack`
 - `peek` (done)
 - `batch`
