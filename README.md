@@ -13,24 +13,97 @@ Minimal reactive state for Python.
 
 ## Usage
 
+### State
+
 ```python
-from st import State, computed, effect, peek
+from st import State
+
+count = State(1)
+
+count.value = 2
+
+assert count.value == 2
+```
+
+### Computed values
+
+```python
+from st import State, computed
 
 count = State(1)
 double = computed(lambda: count.value * 2)
 
-effect(lambda: print(double.value))
+assert double.value == 2
 
 count.value = 2
 
-current = peek(double)
+assert double.value == 4
 ```
 
-Output:
+### Effects
 
-```text
-2
-4
+```python
+from st import State, effect
+
+count = State(1)
+values: list[int] = []
+
+effect(lambda: values.append(count.value))
+
+count.value = 2
+
+assert values == [1, 2]
+```
+
+### Untracked reads
+
+```python
+from st import State, effect, peek, untrack
+
+count = State(1)
+values: list[int] = []
+
+effect(lambda: values.append(untrack(lambda: count.value)))
+
+count.value = 2
+
+assert values == [1]
+assert peek(count) == 2
+```
+
+### Batched updates
+
+```python
+from st import State, batch, effect
+
+count = State(1)
+values: list[int] = []
+
+effect(lambda: values.append(count.value))
+
+def update() -> None:
+    count.value = 2
+    count.value = 3
+
+batch(update)
+
+assert values == [1, 3]
+```
+
+### Disposal
+
+```python
+from st import State, dispose, effect
+
+count = State(1)
+values: list[int] = []
+
+effect_ = effect(lambda: values.append(count.value))
+dispose(effect_)
+
+count.value = 2
+
+assert values == [1]
 ```
 
 ## Roadmap
