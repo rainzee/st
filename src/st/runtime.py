@@ -1,3 +1,4 @@
+from collections.abc import Callable
 from typing import Protocol
 
 
@@ -41,6 +42,17 @@ def peek[T](value: Peekable[T]) -> T:
     """Read a reactive value without tracking it as a dependency."""
 
     return value._peek()
+
+
+def untrack[T](function: Callable[[], T]) -> T:
+    """Run a function without tracking reactive reads as dependencies."""
+
+    active_effects = _active_effects.copy()
+    _active_effects.clear()
+    try:
+        return function()
+    finally:
+        _active_effects[:] = active_effects
 
 
 def dispose(value: Disposable) -> None:
