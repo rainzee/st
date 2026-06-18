@@ -23,6 +23,9 @@ class Disposable(Protocol):
 
 
 _active_effects: list[EffectLike] = []
+_batch_depth = 0
+_pending_effects: set[EffectLike] = set()
+_is_flushing = False
 
 
 def track_dependency(dependency: Dependency) -> None:
@@ -36,6 +39,30 @@ def push_effect(effect: EffectLike) -> None:
 
 def pop_effect() -> None:
     _active_effects.pop()
+
+
+def schedule_effect(effect: EffectLike) -> None:
+    if _batch_depth > 0 or _is_flushing:
+        _pending_effects.add(effect)
+        return
+
+    effect()
+
+
+def _flush_effects() -> None:
+    global _is_flushing
+
+    if _is_flushing:
+        return
+
+    _is_flushing = True
+    try:
+        while _pending_effects:
+            effect = min(_pending_effects, key=lambda item: getattr(item, "_priority", 1))
+            _pending_effects.remove(effect)
+            effect()
+    finally:
+        _is_flushing = False
 
 
 def peek[T](value: Peekable[T]) -> T:
@@ -53,6 +80,20 @@ def untrack[T](function: Callable[[], T]) -> T:
         return function()
     finally:
         _active_effects[:] = active_effects
+
+
+def batch[T](function: Callable[[], T]) -> T:
+    """Run a function and defer reactive updates until it completes."""
+
+    global _batch_depth
+
+    _batch_depth += 1
+    try:
+        return function()
+    finally:
+        _batch_depth -= 1
+        if _batch_depth == 0:
+            _flush_effects()
 
 
 def dispose(value: Disposable) -> None:

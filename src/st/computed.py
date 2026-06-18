@@ -1,7 +1,7 @@
 from collections.abc import Callable
 
 from st.effect import Effect
-from st.runtime import EffectLike, track_dependency
+from st.runtime import EffectLike, schedule_effect, track_dependency
 
 
 class Computed[T]:
@@ -15,6 +15,7 @@ class Computed[T]:
         self._initialized = False
         self._value: T
         self._effect = Effect(self._recompute)
+        self._effect._priority = 0
         self._disposed = False
         self._effect()
 
@@ -40,7 +41,7 @@ class Computed[T]:
         self._value = value
         self._initialized = True
         for effect in self._effects.copy():
-            effect()
+            schedule_effect(effect)
 
     def _subscribe(self, effect: EffectLike) -> None:
         if self._disposed:

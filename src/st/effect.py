@@ -12,6 +12,7 @@ class Effect:
         self._function = function
         self._dependencies: set[Dependency] = set()
         self._disposed = False
+        self._priority = 1
 
     def __call__(self) -> None:
         """Run the effect and replace its tracked dependencies."""

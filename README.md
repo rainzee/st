@@ -40,7 +40,7 @@ Core infrastructure:
 - `dispose` (done)
 - `untrack` (done)
 - `peek` (done)
-- `batch`
+- `batch` (done)
 - `on_cleanup`
 
 Scheduling:

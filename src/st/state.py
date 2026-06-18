@@ -1,4 +1,4 @@
-from st.runtime import EffectLike, track_dependency
+from st.runtime import EffectLike, schedule_effect, track_dependency
 
 
 class State[T]:
@@ -31,7 +31,7 @@ class State[T]:
 
         self._value = value
         for effect in self._effects.copy():
-            effect()
+            schedule_effect(effect)
 
     def _subscribe(self, effect: EffectLike) -> None:
         self._effects.add(effect)
