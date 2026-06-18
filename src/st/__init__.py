@@ -1,7 +1,9 @@
 from st.computed import Computed, computed
+from st.context import batch, untrack
 from st.effect import Effect, effect
 from st.readonly import Readonly, readonly
-from st.runtime import Scope, batch, dispose, on_cleanup, peek, scope, untrack
+from st.runtime import dispose, peek
+from st.scope import Scope, on_cleanup, scope
 from st.state import State, state
 
 __all__ = [

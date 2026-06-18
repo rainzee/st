@@ -5,10 +5,10 @@ from st.runtime import (
     EffectLike,
     pop_effect,
     push_effect,
-    register_disposable,
     schedule_effect,
     track_dependency,
 )
+from st.scope import register_disposable
 
 
 class Computed[T]:

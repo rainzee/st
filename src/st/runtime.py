@@ -26,7 +26,6 @@ type Cleanup = Callable[[], None]
 
 
 _active_effects: list[EffectLike] = []
-_active_scopes: list["Scope"] = []
 _batch_depth = 0
 _pending_effects: set[EffectLike] = set()
 _is_flushing = False
@@ -106,7 +105,3 @@ def dispose(value: Disposable) -> None:
     """Stop a reactive value from receiving future updates."""
 
     value._dispose()
-
-
-from st.context import BatchContext, UntrackContext, batch, untrack
-from st.scope import Scope, on_cleanup, register_cleanup, register_disposable, scope

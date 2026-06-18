@@ -1,6 +1,9 @@
 from collections.abc import Callable
 
-from st.runtime import Cleanup, Disposable, _active_scopes
+from st.runtime import Cleanup, Disposable
+
+
+_active_scopes: list["Scope"] = []
 
 
 class Scope:

@@ -1,6 +1,7 @@
 from collections.abc import Callable
 
-from st.runtime import Dependency, pop_effect, push_effect, register_disposable
+from st.runtime import Dependency, pop_effect, push_effect
+from st.scope import register_disposable
 
 
 class Effect:
