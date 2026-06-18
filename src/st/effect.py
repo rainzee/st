@@ -58,5 +58,10 @@ def effect(function: Callable[[], None]) -> Effect:
 
     effect_ = Effect(function)
     register_disposable(effect_)
-    effect_()
+    try:
+        effect_()
+    except BaseException:
+        effect_._dispose()
+        raise
+
     return effect_

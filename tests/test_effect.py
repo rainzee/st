@@ -1,3 +1,5 @@
+import pytest
+
 from st import State, computed, effect
 
 
@@ -10,6 +12,22 @@ def test_effect_tracks_state_dependency() -> None:
     state.value = 2
 
     assert values == [1, 2]
+
+
+def test_effect_disposes_initial_dependencies_when_initial_run_raises() -> None:
+    state = State(1)
+    values: list[int] = []
+
+    def fail() -> None:
+        values.append(state.value)
+        raise RuntimeError("boom")
+
+    with pytest.raises(RuntimeError, match="boom"):
+        effect(fail)
+
+    state.value = 2
+
+    assert values == [1]
 
 
 def test_effect_replaces_stale_dependencies() -> None:
