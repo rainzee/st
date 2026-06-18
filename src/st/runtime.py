@@ -33,6 +33,27 @@ _pending_effects: set[EffectLike] = set()
 _is_flushing = False
 
 
+def run_cleanups(cleanups: list[Cleanup]) -> None:
+    """Run cleanup callbacks in LIFO order and report any failures."""
+
+    exceptions: list[BaseException] = []
+
+    while cleanups:
+        cleanup = cleanups.pop()
+        try:
+            cleanup()
+        except BaseException as error:
+            exceptions.append(error)
+
+    if not exceptions:
+        return
+
+    if len(exceptions) == 1:
+        raise exceptions[0]
+
+    raise BaseExceptionGroup("cleanup callbacks failed", exceptions)
+
+
 def track_dependency(dependency: Dependency) -> None:
     if _active_effects:
         _active_effects[-1]._depend_on(dependency)

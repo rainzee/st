@@ -107,6 +107,26 @@ def test_on_cleanup_runs_callbacks_when_scope_exits() -> None:
     assert values == ["second", "first"]
 
 
+def test_scope_runs_all_cleanups_when_cleanup_raises() -> None:
+    values: list[str] = []
+
+    def first() -> None:
+        values.append("first")
+        raise RuntimeError("first")
+
+    def second() -> None:
+        values.append("second")
+        raise RuntimeError("second")
+
+    with pytest.raises(BaseExceptionGroup) as error:
+        with scope():
+            on_cleanup(first)
+            on_cleanup(second)
+
+    assert values == ["second", "first"]
+    assert len(error.value.exceptions) == 2
+
+
 def test_on_cleanup_requires_active_scope() -> None:
     with pytest.raises(RuntimeError, match="active scope"):
         on_cleanup(lambda: None)

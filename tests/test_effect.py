@@ -79,6 +79,75 @@ def test_effect_runs_cleanup_when_disposed() -> None:
     assert values == ["cleanup"]
 
 
+def test_effect_runs_all_cleanups_when_cleanup_raises() -> None:
+    state = State(1)
+    values: list[str] = []
+
+    def collect_value() -> None:
+        state.value
+
+        def first() -> None:
+            values.append("first")
+            raise RuntimeError("first")
+
+        def second() -> None:
+            values.append("second")
+            raise RuntimeError("second")
+
+        on_cleanup(first)
+        on_cleanup(second)
+
+    effect(collect_value)
+
+    with pytest.raises(BaseExceptionGroup) as error:
+        state.value = 2
+
+    assert values == ["second", "first"]
+    assert len(error.value.exceptions) == 2
+
+
+def test_effect_unsubscribes_old_dependencies_when_cleanup_raises() -> None:
+    state = State(1)
+    values: list[int] = []
+
+    def fail_cleanup() -> None:
+        raise RuntimeError("cleanup")
+
+    def collect_value() -> None:
+        values.append(state.value)
+        on_cleanup(fail_cleanup)
+
+    effect(collect_value)
+
+    with pytest.raises(RuntimeError, match="cleanup"):
+        state.value = 2
+
+    state.value = 3
+
+    assert values == [1]
+
+
+def test_effect_dispose_unsubscribes_dependencies_when_cleanup_raises() -> None:
+    state = State(1)
+    values: list[int] = []
+
+    def fail_cleanup() -> None:
+        raise RuntimeError("cleanup")
+
+    def collect_value() -> None:
+        values.append(state.value)
+        on_cleanup(fail_cleanup)
+
+    effect_ = effect(collect_value)
+
+    with pytest.raises(RuntimeError, match="cleanup"):
+        effect_.dispose()
+
+    state.value = 2
+
+    assert values == [1]
+
+
 def test_effect_tracks_computed_dependency() -> None:
     count = State(1)
     double = computed(lambda: count.value * 2)

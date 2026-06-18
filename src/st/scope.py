@@ -1,6 +1,6 @@
 from collections.abc import Callable
 
-from st.runtime import Cleanup, Disposable, get_active_effect
+from st.runtime import Cleanup, Disposable, get_active_effect, run_cleanups
 
 
 _active_scopes: list["Scope"] = []
@@ -59,18 +59,7 @@ class Scope:
             return
 
         self._disposed = True
-        exception: BaseException | None = None
-
-        while self._cleanups:
-            cleanup = self._cleanups.pop()
-            try:
-                cleanup()
-            except BaseException as error:
-                if exception is None:
-                    exception = error
-
-        if exception is not None:
-            raise exception
+        run_cleanups(self._cleanups)
 
 
 def scope() -> Scope:

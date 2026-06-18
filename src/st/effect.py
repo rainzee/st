@@ -1,6 +1,6 @@
 from collections.abc import Callable
 
-from st.runtime import Cleanup, Dependency, pop_effect, push_effect
+from st.runtime import Cleanup, Dependency, pop_effect, push_effect, run_cleanups
 from st.scope import register_disposable
 
 
@@ -22,11 +22,18 @@ class Effect:
         if self._disposed:
             return
 
-        self._run_cleanups()
+        cleanup_error: BaseException | None = None
+        try:
+            self._run_cleanups()
+        except BaseException as error:
+            cleanup_error = error
 
         for dependency in self._dependencies:
             dependency._unsubscribe(self)
         self._dependencies.clear()
+
+        if cleanup_error is not None:
+            raise cleanup_error
 
         push_effect(self)
         try:
@@ -49,18 +56,7 @@ class Effect:
         self._cleanups.append(cleanup)
 
     def _run_cleanups(self) -> None:
-        exception: BaseException | None = None
-
-        while self._cleanups:
-            cleanup = self._cleanups.pop()
-            try:
-                cleanup()
-            except BaseException as error:
-                if exception is None:
-                    exception = error
-
-        if exception is not None:
-            raise exception
+        run_cleanups(self._cleanups)
 
     def dispose(self) -> None:
         """Stop this effect from receiving future updates."""
@@ -72,10 +68,18 @@ class Effect:
             return
 
         self._disposed = True
-        self._run_cleanups()
+        cleanup_error: BaseException | None = None
+        try:
+            self._run_cleanups()
+        except BaseException as error:
+            cleanup_error = error
+
         for dependency in self._dependencies:
             dependency._unsubscribe(self)
         self._dependencies.clear()
+
+        if cleanup_error is not None:
+            raise cleanup_error
 
 
 def effect(function: Callable[[], None]) -> Effect:
@@ -85,8 +89,12 @@ def effect(function: Callable[[], None]) -> Effect:
     register_disposable(effect_)
     try:
         effect_()
-    except BaseException:
-        effect_._dispose()
+    except BaseException as error:
+        try:
+            effect_._dispose()
+        except BaseException as cleanup_error:
+            raise BaseExceptionGroup("effect failed and cleanup failed", [error, cleanup_error]) from error
+
         raise
 
     return effect_

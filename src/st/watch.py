@@ -2,7 +2,7 @@ from collections.abc import Callable
 from inspect import Parameter, signature
 from typing import Protocol, cast, overload
 
-from st.runtime import Cleanup, Dependency, _pause_tracking, _restore_tracking, pop_effect, push_effect
+from st.runtime import Cleanup, Dependency, _pause_tracking, _restore_tracking, pop_effect, push_effect, run_cleanups
 from st.scope import register_disposable
 
 
@@ -65,8 +65,8 @@ class Watch[T]:
         if value == old:
             return
 
-        self._value = value
         self._run_callback(value, old)
+        self._value = value
 
     def _depend_on(self, dependency: Dependency) -> None:
         if dependency in self._dependencies:
@@ -97,18 +97,7 @@ class Watch[T]:
             _restore_tracking(active_effects)
 
     def _run_cleanups(self) -> None:
-        exception: BaseException | None = None
-
-        while self._cleanups:
-            cleanup = self._cleanups.pop()
-            try:
-                cleanup()
-            except BaseException as error:
-                if exception is None:
-                    exception = error
-
-        if exception is not None:
-            raise exception
+        run_cleanups(self._cleanups)
 
     def dispose(self) -> None:
         """Stop this watcher from receiving future updates."""
@@ -120,10 +109,18 @@ class Watch[T]:
             return
 
         self._disposed = True
-        self._run_cleanups()
+        cleanup_error: BaseException | None = None
+        try:
+            self._run_cleanups()
+        except BaseException as error:
+            cleanup_error = error
+
         for dependency in self._dependencies:
             dependency._unsubscribe(self)
         self._dependencies.clear()
+
+        if cleanup_error is not None:
+            raise cleanup_error
 
 
 @overload
@@ -146,8 +143,12 @@ def watch[T](
     register_disposable(watcher)
     try:
         watcher()
-    except BaseException:
-        watcher._dispose()
+    except BaseException as error:
+        try:
+            watcher._dispose()
+        except BaseException as cleanup_error:
+            raise BaseExceptionGroup("watch failed and cleanup failed", [error, cleanup_error]) from error
+
         raise
 
     return watcher
