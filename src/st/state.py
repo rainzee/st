@@ -3,7 +3,6 @@ from typing import Literal
 
 from st.runtime import EffectLike, schedule_effect, track_dependency
 
-
 type Equality[T] = Callable[[T, T], bool] | Literal[False]
 
 
@@ -18,7 +17,13 @@ class State[T]:
         """Create state with an initial value."""
 
         self._value = value
-        self._equals = equals
+        self._equals: Callable[[T, T], bool] | None
+
+        if equals is False:
+            self._equals = None
+        else:
+            self._equals = equals
+
         self._effects: set[EffectLike] = set()
 
     @property
@@ -37,10 +42,11 @@ class State[T]:
 
     @value.setter
     def value(self, value: T) -> None:
-        if self._equals is not False and self._equals(self._value, value):
+        if self._equals is not None and self._equals(self._value, value):
             return
 
         self._value = value
+
         for effect in self._effects.copy():
             schedule_effect(effect)
 
