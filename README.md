@@ -109,6 +109,23 @@ count.value = 2
 assert values == [1]
 ```
 
+### Scopes
+
+```python
+from st import effect, on_cleanup, scope, state
+
+count = state(1)
+values: list[int] = []
+
+with scope():
+    effect(lambda: values.append(count.value))
+    on_cleanup(lambda: values.append(-1))
+
+count.value = 2
+
+assert values == [1, -1]
+```
+
 ## Roadmap
 
 Core infrastructure:
@@ -117,7 +134,7 @@ Core infrastructure:
 - `untrack` (done)
 - `peek` (done)
 - `batch` (done)
-- `on_cleanup`
+- `on_cleanup` (done)
 
 Scheduling:
 

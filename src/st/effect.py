@@ -1,6 +1,6 @@
 from collections.abc import Callable
 
-from st.runtime import Dependency, pop_effect, push_effect
+from st.runtime import Dependency, pop_effect, push_effect, register_disposable
 
 
 class Effect:
@@ -51,5 +51,6 @@ def effect(function: Callable[[], None]) -> Effect:
     """Create and immediately run a reactive side effect."""
 
     effect_ = Effect(function)
+    register_disposable(effect_)
     effect_()
     return effect_

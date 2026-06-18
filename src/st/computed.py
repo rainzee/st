@@ -5,6 +5,7 @@ from st.runtime import (
     EffectLike,
     pop_effect,
     push_effect,
+    register_disposable,
     schedule_effect,
     track_dependency,
 )
@@ -112,4 +113,6 @@ class Computed[T]:
 def computed[T](function: Callable[[], T]) -> Computed[T]:
     """Create a read-only derived state."""
 
-    return Computed(function)
+    computed_ = Computed(function)
+    register_disposable(computed_)
+    return computed_
