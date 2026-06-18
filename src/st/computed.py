@@ -48,21 +48,25 @@ class Computed[T]:
 
         if not self._disposed:
             track_dependency(self)
+
         if self._dirty:
             self._recompute()
+
         return self._value
 
     def _peek(self) -> T:
         if self._dirty:
             self._recompute()
+
         return self._value
 
     def _recompute(self) -> bool:
         for dependency in self._dependencies:
             dependency._unsubscribe(self)
-        self._dependencies.clear()
 
+        self._dependencies.clear()
         push_effect(self)
+
         try:
             value = self._function()
         finally:
@@ -97,8 +101,10 @@ class Computed[T]:
             return
 
         self._disposed = True
+
         for dependency in self._dependencies:
             dependency._unsubscribe(self)
+
         self._dependencies.clear()
         self._effects.clear()
 
