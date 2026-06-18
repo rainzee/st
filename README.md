@@ -84,6 +84,37 @@ count.value = 2
 assert values == [1, 2]
 ```
 
+### Watching explicit sources
+
+```python
+from st import watch, state
+
+count = state(1)
+values: list[tuple[int, int | None]] = []
+
+watch(lambda: count.value, lambda new, old: values.append((new, old)))
+
+count.value = 2
+
+assert values == [(2, 1)]
+```
+
+```python
+from st import watch, state
+
+count = state(1)
+values: list[str] = []
+
+def sync(new: int, old: int | None, on_cleanup) -> None:
+    on_cleanup(lambda: values.append(f"cleanup {new}"))
+    values.append(f"{old}->{new}")
+
+watch(lambda: count.value, sync, immediate=True)
+count.value = 2
+
+assert values == ["None->1", "cleanup 1", "1->2"]
+```
+
 ### Effect cleanup
 
 ```python

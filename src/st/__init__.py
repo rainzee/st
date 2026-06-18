@@ -5,6 +5,7 @@ from st.readonly import Readonly, readonly
 from st.runtime import dispose, peek
 from st.scope import Scope, on_cleanup, scope
 from st.state import State, state
+from st.watch import Watch, watch
 
 __all__ = [
     "Computed",
@@ -12,6 +13,7 @@ __all__ = [
     "Readonly",
     "State",
     "Scope",
+    "Watch",
     "batch",
     "computed",
     "dispose",
@@ -22,4 +24,5 @@ __all__ = [
     "scope",
     "state",
     "untrack",
+    "watch",
 ]
