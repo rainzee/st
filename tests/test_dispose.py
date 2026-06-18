@@ -66,6 +66,7 @@ def test_unreachable_state_effect_cycle_is_collected() -> None:
 def test_dispose_stops_computed_recomputation() -> None:
     count = State(1)
     double = computed(lambda: count.value * 2)
+    assert double.value == 2
 
     dispose(double)
     count.value = 2
@@ -77,6 +78,7 @@ def test_disposed_computed_is_not_tracked_by_new_effects() -> None:
     count = State(1)
     double = computed(lambda: count.value * 2)
     values: list[int] = []
+    assert double.value == 2
 
     dispose(double)
     effect(lambda: values.append(double.value))
