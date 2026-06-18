@@ -1,4 +1,4 @@
-from st import State
+from st import State, state
 
 
 def test_state_exposes_initial_value(state: State[int]) -> None:
@@ -17,3 +17,10 @@ def test_state_can_store_none() -> None:
     state.value = None
 
     assert state.value is None
+
+
+def test_state_factory_creates_state() -> None:
+    count = state(1)
+
+    assert isinstance(count, State)
+    assert count.value == 1

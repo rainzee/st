@@ -16,9 +16,9 @@ Minimal reactive state for Python.
 ### State
 
 ```python
-from st import State
+from st import state
 
-count = State(1)
+count = state(1)
 
 count.value = 2
 
@@ -28,9 +28,9 @@ assert count.value == 2
 ### Computed values
 
 ```python
-from st import State, computed
+from st import computed, state
 
-count = State(1)
+count = state(1)
 double = computed(lambda: count.value * 2)
 
 assert double.value == 2
@@ -43,9 +43,9 @@ assert double.value == 4
 ### Effects
 
 ```python
-from st import State, effect
+from st import effect, state
 
-count = State(1)
+count = state(1)
 values: list[int] = []
 
 effect(lambda: values.append(count.value))
@@ -58,9 +58,9 @@ assert values == [1, 2]
 ### Untracked reads
 
 ```python
-from st import State, effect, peek, untrack
+from st import effect, peek, state, untrack
 
-count = State(1)
+count = state(1)
 values: list[int] = []
 
 effect(lambda: values.append(untrack(lambda: count.value)))
@@ -74,9 +74,9 @@ assert peek(count) == 2
 ### Batched updates
 
 ```python
-from st import State, batch, effect
+from st import batch, effect, state
 
-count = State(1)
+count = state(1)
 values: list[int] = []
 
 effect(lambda: values.append(count.value))
@@ -93,9 +93,9 @@ assert values == [1, 3]
 ### Disposal
 
 ```python
-from st import State, dispose, effect
+from st import dispose, effect, state
 
-count = State(1)
+count = state(1)
 values: list[int] = []
 
 effect_ = effect(lambda: values.append(count.value))

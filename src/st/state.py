@@ -38,3 +38,9 @@ class State[T]:
 
     def _unsubscribe(self, effect: EffectLike) -> None:
         self._effects.discard(effect)
+
+
+def state[T](value: T) -> State[T]:
+    """Create mutable reactive state."""
+
+    return State(value)
