@@ -48,6 +48,19 @@ def test_state_equals_false_always_notifies() -> None:
     assert values == [1, 1]
 
 
+def test_state_notifies_effects_in_subscription_order() -> None:
+    count = state(1)
+    values: list[str] = []
+
+    effect(lambda: values.append(f"first {count.value}"))
+    effect(lambda: values.append(f"second {count.value}"))
+    values.clear()
+
+    count.value = 2
+
+    assert values == ["first 2", "second 2"]
+
+
 def test_state_class_accepts_custom_equality() -> None:
     count = State(1, equals=lambda old, new: old % 2 == new % 2)
     values: list[int] = []

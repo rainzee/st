@@ -24,7 +24,7 @@ class State[T]:
         else:
             self._equals = equals
 
-        self._effects: set[EffectLike] = set()
+        self._effects: dict[EffectLike, None] = {}
 
     @property
     def value(self) -> T:
@@ -47,14 +47,14 @@ class State[T]:
 
         self._value = value
 
-        for effect in self._effects.copy():
+        for effect in list(self._effects):
             schedule_effect(effect)
 
     def _subscribe(self, effect: EffectLike) -> None:
-        self._effects.add(effect)
+        self._effects[effect] = None
 
     def _unsubscribe(self, effect: EffectLike) -> None:
-        self._effects.discard(effect)
+        self._effects.pop(effect, None)
 
 
 def state[T](value: T, *, equals: Equality[T] = _default_equals) -> State[T]:

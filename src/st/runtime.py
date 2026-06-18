@@ -29,7 +29,7 @@ type Cleanup = Callable[[], None]
 
 _active_effects: list[EffectLike] = []
 _batch_depth = 0
-_pending_effects: set[EffectLike] = set()
+_pending_effects: dict[EffectLike, None] = {}
 _is_flushing = False
 
 
@@ -79,7 +79,7 @@ def schedule_effect(effect: EffectLike) -> None:
         return
 
     if _batch_depth > 0 or _is_flushing:
-        _pending_effects.add(effect)
+        _pending_effects[effect] = None
         return
 
     effect()
@@ -95,7 +95,7 @@ def _flush_effects() -> None:
     try:
         while _pending_effects:
             effect = min(_pending_effects, key=lambda item: getattr(item, "_priority", 1))
-            _pending_effects.remove(effect)
+            del _pending_effects[effect]
             effect()
     finally:
         _is_flushing = False

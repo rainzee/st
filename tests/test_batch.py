@@ -99,6 +99,22 @@ def test_batch_updates_computed_before_dependent_effect_runs() -> None:
     assert values == [(1, 2), (3, 6)]
 
 
+def test_batch_preserves_effect_order_within_same_priority() -> None:
+    count = State(1)
+    double = computed(lambda: count.value * 2)
+    values: list[str] = []
+
+    effect(lambda: values.append(f"first {count.value}"))
+    effect(lambda: values.append(f"second {count.value}"))
+    effect(lambda: values.append(f"double {double.value}"))
+    values.clear()
+
+    with batch():
+        count.value = 2
+
+    assert values == ["first 2", "second 2", "double 4"]
+
+
 def _set_and_return[T](state: State[T], value: T, result: object) -> object:
     state.value = value
     return result

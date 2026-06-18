@@ -18,7 +18,7 @@ class Computed[T]:
         """Create a computed value from a pure derivation function."""
 
         self._function = function
-        self._effects: set[EffectLike] = set()
+        self._effects: dict[EffectLike, None] = {}
         self._dependencies: set[Dependency] = set()
         self._initialized = False
         self._dirty = True
@@ -37,7 +37,7 @@ class Computed[T]:
             return
 
         if self._recompute():
-            for effect in self._effects.copy():
+            for effect in list(self._effects):
                 schedule_effect(effect)
 
     @property
@@ -92,10 +92,10 @@ class Computed[T]:
         if self._disposed:
             return
 
-        self._effects.add(effect)
+        self._effects[effect] = None
 
     def _unsubscribe(self, effect: EffectLike) -> None:
-        self._effects.discard(effect)
+        self._effects.pop(effect, None)
 
     def dispose(self) -> None:
         """Stop this computed value from receiving future updates."""
