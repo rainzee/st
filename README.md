@@ -53,6 +53,22 @@ count.value = 2
 assert public_count.value == 2
 ```
 
+### Custom equality
+
+```python
+from st import effect, state
+
+count = state(1, equals=lambda old, new: old % 2 == new % 2)
+values: list[int] = []
+
+effect(lambda: values.append(count.value))
+
+count.value = 3
+count.value = 4
+
+assert values == [1, 4]
+```
+
 ### Effects
 
 ```python
