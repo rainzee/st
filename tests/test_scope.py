@@ -69,6 +69,16 @@ def test_dispose_scope_runs_registered_cleanups() -> None:
     assert values == ["cleanup"]
 
 
+def test_scope_dispose_method_runs_registered_cleanups() -> None:
+    values: list[str] = []
+
+    with scope() as owner:
+        on_cleanup(lambda: values.append("cleanup"))
+        owner.dispose()
+
+    assert values == ["cleanup"]
+
+
 def test_nested_scope_is_disposed_with_parent_scope() -> None:
     count = State(1)
     values: list[int] = []

@@ -102,7 +102,7 @@ count = state(1)
 values: list[int] = []
 
 effect_ = effect(lambda: values.append(count.value))
-dispose(effect_)
+effect_.dispose()
 
 count.value = 2
 

@@ -97,6 +97,11 @@ class Computed[T]:
     def _unsubscribe(self, effect: EffectLike) -> None:
         self._effects.discard(effect)
 
+    def dispose(self) -> None:
+        """Stop this computed value from receiving future updates."""
+
+        self._dispose()
+
     def _dispose(self) -> None:
         if self._disposed:
             return

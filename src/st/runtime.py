@@ -53,6 +53,11 @@ class Scope:
         _active_scopes.pop()
         self._dispose()
 
+    def dispose(self) -> None:
+        """Dispose this scope and run its cleanup callbacks."""
+
+        self._dispose()
+
     def _add_cleanup(self, cleanup: Cleanup) -> None:
         if self._disposed:
             cleanup()

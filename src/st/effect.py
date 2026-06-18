@@ -37,6 +37,11 @@ class Effect:
         self._dependencies.add(dependency)
         dependency._subscribe(self)
 
+    def dispose(self) -> None:
+        """Stop this effect from receiving future updates."""
+
+        self._dispose()
+
     def _dispose(self) -> None:
         if self._disposed:
             return
