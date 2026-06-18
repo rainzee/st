@@ -1,6 +1,6 @@
 from collections.abc import Callable
 
-from st.runtime import Dependency, pop_effect, push_effect
+from st.runtime import Cleanup, Dependency, pop_effect, push_effect
 from st.scope import register_disposable
 
 
@@ -11,6 +11,7 @@ class Effect:
         """Create an effect wrapper without running it."""
 
         self._function = function
+        self._cleanups: list[Cleanup] = []
         self._dependencies: set[Dependency] = set()
         self._disposed = False
         self._priority = 1
@@ -20,6 +21,8 @@ class Effect:
 
         if self._disposed:
             return
+
+        self._run_cleanups()
 
         for dependency in self._dependencies:
             dependency._unsubscribe(self)
@@ -38,6 +41,27 @@ class Effect:
         self._dependencies.add(dependency)
         dependency._subscribe(self)
 
+    def _add_cleanup(self, cleanup: Cleanup) -> None:
+        if self._disposed:
+            cleanup()
+            return
+
+        self._cleanups.append(cleanup)
+
+    def _run_cleanups(self) -> None:
+        exception: BaseException | None = None
+
+        while self._cleanups:
+            cleanup = self._cleanups.pop()
+            try:
+                cleanup()
+            except BaseException as error:
+                if exception is None:
+                    exception = error
+
+        if exception is not None:
+            raise exception
+
     def dispose(self) -> None:
         """Stop this effect from receiving future updates."""
 
@@ -48,6 +72,7 @@ class Effect:
             return
 
         self._disposed = True
+        self._run_cleanups()
         for dependency in self._dependencies:
             dependency._unsubscribe(self)
         self._dependencies.clear()

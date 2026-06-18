@@ -1,6 +1,6 @@
 from collections.abc import Callable
 
-from st.runtime import Cleanup, Disposable
+from st.runtime import Cleanup, Disposable, get_active_effect
 
 
 _active_scopes: list["Scope"] = []
@@ -80,6 +80,11 @@ def scope() -> Scope:
 
 
 def register_cleanup(cleanup: Cleanup) -> None:
+    effect = get_active_effect()
+    if effect is not None:
+        effect._add_cleanup(cleanup)
+        return
+
     if not _active_scopes:
         raise RuntimeError("on_cleanup() requires an active scope")
 

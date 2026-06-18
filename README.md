@@ -84,6 +84,25 @@ count.value = 2
 assert values == [1, 2]
 ```
 
+### Effect cleanup
+
+```python
+from st import effect, on_cleanup, state
+
+count = state(1)
+values: list[str] = []
+
+def sync() -> None:
+    value = count.value
+    on_cleanup(lambda: values.append(f"cleanup {value}"))
+    values.append(f"run {value}")
+
+effect(sync)
+count.value = 2
+
+assert values == ["run 1", "cleanup 1", "run 2"]
+```
+
 ### Untracked reads
 
 ```python

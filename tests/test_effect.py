@@ -1,6 +1,6 @@
 import pytest
 
-from st import State, computed, effect
+from st import State, computed, effect, on_cleanup
 
 
 def test_effect_tracks_state_dependency() -> None:
@@ -50,6 +50,33 @@ def test_effect_replaces_stale_dependencies() -> None:
     second.value = "updated"
 
     assert values == ["first", "second", "updated"]
+
+
+def test_effect_runs_cleanup_before_next_run() -> None:
+    state = State(1)
+    values: list[str] = []
+
+    def collect_value() -> None:
+        value = state.value
+        on_cleanup(lambda: values.append(f"cleanup {value}"))
+        values.append(f"run {value}")
+
+    effect(collect_value)
+    state.value = 2
+
+    assert values == ["run 1", "cleanup 1", "run 2"]
+
+
+def test_effect_runs_cleanup_when_disposed() -> None:
+    state = State(1)
+    values: list[str] = []
+
+    effect_ = effect(lambda: (on_cleanup(lambda: values.append("cleanup")), state.value))
+
+    effect_.dispose()
+    state.value = 2
+
+    assert values == ["cleanup"]
 
 
 def test_effect_tracks_computed_dependency() -> None:

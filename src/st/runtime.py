@@ -13,6 +13,8 @@ class EffectLike(Protocol):
 
     def _depend_on(self, dependency: Dependency) -> None: ...
 
+    def _add_cleanup(self, cleanup: "Cleanup") -> None: ...
+
 
 class Peekable[T](Protocol):
     def _peek(self) -> T: ...
@@ -42,6 +44,13 @@ def push_effect(effect: EffectLike) -> None:
 
 def pop_effect() -> None:
     _active_effects.pop()
+
+
+def get_active_effect() -> EffectLike | None:
+    if not _active_effects:
+        return None
+
+    return _active_effects[-1]
 
 
 def schedule_effect(effect: EffectLike) -> None:

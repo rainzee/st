@@ -41,6 +41,16 @@ def test_scope_run_defers_cleanup_until_scope_is_disposed() -> None:
     assert values == ["cleanup"]
 
 
+def test_scope_cleanup_is_used_outside_effect_runs() -> None:
+    values: list[str] = []
+
+    with scope():
+        on_cleanup(lambda: values.append("cleanup"))
+        assert values == []
+
+    assert values == ["cleanup"]
+
+
 def test_scope_run_disposes_resources_when_setup_raises() -> None:
     count = State(1)
     values: list[int] = []
