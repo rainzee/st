@@ -145,14 +145,17 @@ from st import effect, on_cleanup, scope, state
 
 count = state(1)
 values: list[int] = []
+owner = scope()
 
-with scope():
+def setup() -> None:
     effect(lambda: values.append(count.value))
     on_cleanup(lambda: values.append(-1))
 
+owner.run(setup)
 count.value = 2
+owner.dispose()
 
-assert values == [1, -1]
+assert values == [1, 2, -1]
 ```
 
 ## Roadmap

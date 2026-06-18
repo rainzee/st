@@ -1,3 +1,5 @@
+from collections.abc import Callable
+
 from st.runtime import Cleanup, Disposable, _active_scopes
 
 
@@ -26,6 +28,21 @@ class Scope:
         """Dispose this scope and run its cleanup callbacks."""
 
         self._dispose()
+
+    def run[T](self, setup: Callable[[], T]) -> T:
+        """Run setup in this scope without disposing when setup completes."""
+
+        if self._disposed:
+            raise RuntimeError("Cannot run a disposed scope")
+
+        _active_scopes.append(self)
+        try:
+            return setup()
+        except BaseException:
+            self._dispose()
+            raise
+        finally:
+            _active_scopes.pop()
 
     def _add_cleanup(self, cleanup: Cleanup) -> None:
         if self._disposed:

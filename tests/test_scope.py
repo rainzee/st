@@ -15,6 +15,49 @@ def test_scope_disposes_effects_on_exit() -> None:
     assert values == [1]
 
 
+def test_scope_run_keeps_effects_alive_until_scope_is_disposed() -> None:
+    count = State(1)
+    values: list[int] = []
+    owner = scope()
+
+    owner.run(lambda: effect(lambda: values.append(count.value)))
+    count.value = 2
+    owner.dispose()
+    count.value = 3
+
+    assert values == [1, 2]
+
+
+def test_scope_run_defers_cleanup_until_scope_is_disposed() -> None:
+    values: list[str] = []
+    owner = scope()
+
+    owner.run(lambda: on_cleanup(lambda: values.append("cleanup")))
+
+    assert values == []
+
+    owner.dispose()
+
+    assert values == ["cleanup"]
+
+
+def test_scope_run_disposes_resources_when_setup_raises() -> None:
+    count = State(1)
+    values: list[int] = []
+    owner = scope()
+
+    def setup() -> None:
+        effect(lambda: values.append(count.value))
+        raise RuntimeError("boom")
+
+    with pytest.raises(RuntimeError, match="boom"):
+        owner.run(setup)
+
+    count.value = 2
+
+    assert values == [1]
+
+
 def test_scope_disposes_effect_when_initial_run_raises() -> None:
     count = State(1)
     values: list[int] = []
