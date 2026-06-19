@@ -1,0 +1,520 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>st - Minimal reactive state for Python</title>
+    <meta
+      name="description"
+      content="A small, typed reactive state runtime for Python with explicit ownership and deterministic updates."
+    >
+    <meta property="og:title" content="st - Minimal reactive state for Python">
+    <meta
+      property="og:description"
+      content="State, computed values, effects, watchers, scopes, and cleanup. No runtime dependencies."
+    >
+    <meta property="og:type" content="website">
+    <style>
+      :root {
+        --font-mono: "JetBrains Mono", "SF Mono", SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+        --spacing: 0.25rem;
+        --color-bg: #2a2bd5;
+        --color-bg-deep: #2020b8;
+        --color-fg: #ffffff;
+        --color-fg-muted: #c0c0ec;
+        --color-fg-subtle: #8b8bcb;
+        --color-line: #5151e3;
+        --color-line-soft: #3a3adc;
+        --color-mark: #ffe066;
+      }
+
+      * {
+        box-sizing: border-box;
+        border-color: var(--color-line);
+        border-radius: 0 !important;
+      }
+
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+        background: var(--color-bg);
+        color: var(--color-fg);
+        font-family: var(--font-mono);
+        font-size: 13px;
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: geometricprecision;
+      }
+
+      ::selection {
+        background: var(--color-mark);
+        color: var(--color-bg);
+      }
+
+      a {
+        color: inherit;
+        text-decoration: underline;
+        text-decoration-thickness: 1px;
+        text-underline-offset: 3px;
+      }
+
+      a:hover {
+        background: var(--color-mark);
+        color: var(--color-bg);
+      }
+
+      p,
+      h1,
+      h2,
+      ul,
+      pre {
+        margin: 0;
+      }
+
+      ul {
+        padding: 0;
+        list-style: none;
+      }
+
+      code,
+      pre {
+        font-family: var(--font-mono);
+        font-size: 1em;
+      }
+
+      header {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 2rem;
+        padding: 1.5rem 1.5rem 2.5rem;
+        font-size: 12px;
+        line-height: 1.25;
+        letter-spacing: 0.025em;
+        text-transform: uppercase;
+      }
+
+      header a {
+        text-decoration: none;
+      }
+
+      .brand {
+        font-weight: 700;
+      }
+
+      .nav {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+      }
+
+      section {
+        max-width: 860px;
+        margin-inline: auto;
+        padding: 3rem 1.5rem;
+        border-top: 1px solid var(--color-line);
+        scroll-margin-top: 2rem;
+      }
+
+      footer {
+        max-width: 1100px;
+        margin-inline: auto;
+        padding: 2.5rem 1.5rem;
+        border-top: 1px solid var(--color-line);
+        font-size: 11px;
+        letter-spacing: 0.025em;
+        text-transform: uppercase;
+      }
+
+      .h-doc {
+        margin-bottom: 1.5rem;
+        font-size: 13px;
+        font-weight: 700;
+        line-height: 1.4;
+        letter-spacing: 0;
+        text-transform: uppercase;
+      }
+
+      .h-doc-1 {
+        margin-bottom: 2rem;
+      }
+
+      .h-doc-1::before {
+        content: "# ";
+        color: var(--color-fg-muted);
+      }
+
+      .h-doc-2::before {
+        content: "## ~ ";
+        color: var(--color-fg-muted);
+      }
+
+      .copy {
+        font-size: 13px;
+        line-height: 1.7;
+      }
+
+      .copy > * + * {
+        margin-top: 1.25rem;
+      }
+
+      .code-wrap {
+        margin-block: 1.5rem;
+      }
+
+      .code-block {
+        overflow-x: auto;
+        padding: 12px 16px;
+        border: 1px solid var(--color-line);
+        background: var(--color-bg-deep);
+        color: var(--color-fg);
+        font-size: 12px;
+        line-height: 1.55;
+        white-space: pre;
+      }
+
+      .callout {
+        padding: 6px 16px;
+        border: 1px solid var(--color-line);
+        border-top: 0;
+        background: var(--color-bg-deep);
+        color: var(--color-fg-muted);
+        font-size: 11px;
+      }
+
+      .ic {
+        padding: 0 4px;
+        background: var(--color-line-soft);
+        color: var(--color-fg);
+      }
+
+      .muted {
+        color: var(--color-fg-muted);
+      }
+
+      .subtle {
+        color: var(--color-fg-subtle);
+      }
+
+      .api-table {
+        width: 100%;
+        margin-top: 1.5rem;
+        border-collapse: collapse;
+        font-size: 12px;
+        line-height: 1.55;
+      }
+
+      .api-table th,
+      .api-table td {
+        padding: 8px 12px;
+        border: 1px solid var(--color-line);
+        text-align: left;
+        vertical-align: top;
+      }
+
+      .api-table th {
+        font-weight: 700;
+        text-transform: uppercase;
+      }
+
+      .footer-nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem 1rem;
+        margin-top: 1rem;
+      }
+
+      .footer-nav span + span::before {
+        margin-right: 1rem;
+        color: var(--color-fg-subtle);
+        content: "|";
+      }
+
+      .footer-meta {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        margin-top: 1.5rem;
+        color: var(--color-fg-muted);
+      }
+
+      @media (min-width: 40rem) {
+        header {
+          padding-inline: 2.5rem;
+        }
+
+        section {
+          padding-inline: 2.5rem;
+        }
+
+        footer {
+          padding-inline: 2.5rem;
+        }
+
+        .footer-meta {
+          flex-direction: row;
+          justify-content: space-between;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div>
+          <a class="brand" href="#">ST</a>
+        </div>
+        <nav class="nav" aria-label="Primary">
+          <a href="#api">[ API ]</a>
+          <a href="#example">[ EXAMPLE ]</a>
+          <a href="https://github.com/rainzee/st">[ GITHUB ]</a>
+        </nav>
+      </header>
+
+      <section>
+        <h1 class="h-doc h-doc-1">MINIMAL REACTIVE STATE FOR PYTHON</h1>
+        <div class="copy">
+          <p>
+            <span class="ic">st</span> is a small, typed reactive state runtime for Python.
+            Values are plain objects with a <span class="ic">.value</span>, derived state is lazy,
+            and side effects are owned explicitly instead of hidden behind framework magic.
+          </p>
+          <p>
+            Sources notify computations, computations track their sources, and scopes make
+            ownership visible. Updates are synchronous and deterministic by default, so the
+            mental model stays close to the code you write.
+          </p>
+        </div>
+        <div class="code-wrap">
+          <pre class="code-block"><code>&gt; uv sync
+&gt; uv run python examples/shopping_cart.py</code></pre>
+          <div class="callout">zero runtime dependencies. Python &gt;= 3.13.</div>
+        </div>
+      </section>
+
+      <section id="graph">
+        <h2 class="h-doc h-doc-2">THE GRAPH</h2>
+        <div class="copy">
+          <p>
+            Three primitives form the reactive graph: <span class="ic">state</span> for mutable
+            sources, <span class="ic">computed</span> for lazy derived values, and
+            <span class="ic">effect</span> for tracked side effects.
+          </p>
+          <p>
+            Computations replace their source set on each run. Unchanged values short-circuit
+            equality checks, so subscribers only hear about meaningful changes.
+          </p>
+        </div>
+        <div class="code-wrap">
+          <pre class="code-block"><code>st runtime
+
+    read .value tracks source                 read .value tracks source
++------------------------+               +------------------------+
+| state(count)           | ------------&gt; | computed(double)       |
+| mutable source         |               | lazy cache, dirty flag |
++-----------+------------+               +-----------+------------+
+            |                                        |
+            | write .value                           | read derived value
+            | equality check                         v
+            | notify subscribers          +------------------------+
+            +--------------------------&gt; | effect() / watch()     |
+                                         | side effects + cleanup |
+                                         +-----------+------------+
+                                                     |
+                                                     | owned by
+                                                     v
+                                         +------------------------+
+batch() groups writes ---------------&gt;  | scope() / dispose()    |
+flush once, then run dependents          | explicit lifetime      |
+                                         +------------------------+</code></pre>
+          <div class="callout">read collects sources. write marks dependents dirty. ownership stays visible.</div>
+        </div>
+        <div class="code-wrap">
+          <pre class="code-block"><code>from st import computed, effect, state
+
+count = state(1)
+double = computed(lambda: count.value * 2)
+seen: list[int] = []
+
+effect(lambda: seen.append(double.value))
+
+count.value = 2
+
+assert double.value == 4
+assert seen == [2, 4]</code></pre>
+        </div>
+      </section>
+
+      <section id="ownership">
+        <h2 class="h-doc h-doc-2">EXPLICIT OWNERSHIP</h2>
+        <div class="copy">
+          <p>
+            Effects, computed values, watchers, and cleanup callbacks can belong to a
+            <span class="ic">scope</span>. A scope gives reactive work a visible lifetime.
+          </p>
+          <p>
+            Cleanup is ordinary Python: register it with <span class="ic">on_cleanup</span>,
+            stop resources with <span class="ic">dispose</span>, or let the owning scope close them.
+          </p>
+        </div>
+        <div class="code-wrap">
+          <pre class="code-block"><code>from st import effect, on_cleanup, scope, state
+
+count = state(1)
+values: list[int] = []
+owner = scope()
+
+def setup() -&gt; None:
+    effect(lambda: values.append(count.value))
+    on_cleanup(lambda: values.append(-1))
+
+owner.run(setup)
+count.value = 2
+owner.dispose()
+
+assert values == [1, 2, -1]</code></pre>
+        </div>
+      </section>
+
+      <section id="watch">
+        <h2 class="h-doc h-doc-2">WATCH WHAT YOU MEAN</h2>
+        <div class="copy">
+          <p>
+            <span class="ic">watch</span> tracks an explicit source and reports
+            <span class="ic">new</span>, <span class="ic">old</span>, and optional cleanup.
+            <span class="ic">batch</span> coalesces updates and flushes effects once.
+          </p>
+          <p>
+            When reads should not become dependencies, use <span class="ic">untrack</span>
+            or <span class="ic">peek</span>. The graph stays precise because dependency collection
+            is something you can see.
+          </p>
+        </div>
+        <div class="code-wrap">
+          <pre class="code-block"><code>from st import batch, state, watch
+
+count = state(1)
+events: list[tuple[int, int | None]] = []
+
+watch(lambda: count.value, lambda new, old: events.append((new, old)))
+
+with batch():
+    count.value = 2
+    count.value = 3
+
+assert events == [(3, 1)]</code></pre>
+          <div class="callout">deterministic updates, one flush, no scheduler surprise.</div>
+        </div>
+      </section>
+
+      <section id="api">
+        <h2 class="h-doc h-doc-2">ONE SMALL SURFACE</h2>
+        <div class="copy">
+          <p>
+            The public API is deliberately compact. The runtime uses structural typing
+            internally and PEP 695-style generics for <span class="ic">State[T]</span> and
+            <span class="ic">Computed[T]</span>.
+          </p>
+        </div>
+        <table class="api-table">
+          <thead>
+            <tr>
+              <th>API</th>
+              <th>Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="ic">state(value, *, equals=...)</span></td>
+              <td>Create mutable reactive state.</td>
+            </tr>
+            <tr>
+              <td><span class="ic">computed(fn)</span></td>
+              <td>Create lazy derived state.</td>
+            </tr>
+            <tr>
+              <td><span class="ic">effect(fn)</span></td>
+              <td>Run a side effect with automatic source tracking.</td>
+            </tr>
+            <tr>
+              <td><span class="ic">watch(source, callback)</span></td>
+              <td>Watch an explicit source with new, old, and cleanup.</td>
+            </tr>
+            <tr>
+              <td><span class="ic">readonly(value)</span></td>
+              <td>Expose a read-only view of state or computed state.</td>
+            </tr>
+            <tr>
+              <td><span class="ic">batch()</span></td>
+              <td>Coalesce updates and flush effects once.</td>
+            </tr>
+            <tr>
+              <td><span class="ic">untrack()</span> / <span class="ic">peek(value)</span></td>
+              <td>Read reactive values without collecting sources.</td>
+            </tr>
+            <tr>
+              <td><span class="ic">scope()</span> / <span class="ic">dispose(value)</span></td>
+              <td>Own and stop reactive resources explicitly.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="example">
+        <h2 class="h-doc h-doc-2">SHOPPING CART EXAMPLE</h2>
+        <div class="copy">
+          <p>
+            The example app combines cart lines, coupon validation, checkout readiness,
+            scoped cleanup, untracked analytics snapshots, and batched updates.
+          </p>
+          <p>
+            It is intentionally plain Python: dataclasses, dictionaries, functions, and a
+            reactive layer small enough to inspect in one sitting.
+          </p>
+        </div>
+        <div class="code-wrap">
+          <pre class="code-block"><code>cart = state({})
+coupon_code = state("")
+customer_tier = state("standard")
+
+item_count = computed(lambda: sum(line.quantity for line in cart.value.values()))
+subtotal = computed(lambda: sum(line.subtotal for line in cart.value.values()))
+
+summary = computed(build_summary)
+can_checkout = computed(
+    lambda: item_count.value &gt; 0
+    and all(line.quantity &lt;= INVENTORY.get(line.sku, 0) for line in cart.value.values())
+)</code></pre>
+          <div class="callout">full source: examples/shopping_cart.py</div>
+        </div>
+      </section>
+
+      <section id="roadmap">
+        <h2 class="h-doc h-doc-2">ROADMAP</h2>
+        <div class="copy">
+          <p>Core infrastructure is in place: dispose, untrack, peek, batch, and cleanup.</p>
+          <ul>
+            <li><span class="ic">scheduling</span> - custom effect schedulers, queued flush, next_tick</li>
+            <li><span class="ic">debugging</span> - runtime type guards, source inspection, subscriber inspection</li>
+            <li><span class="ic">labels</span> - optional names for state, computed values, effects, and scopes</li>
+          </ul>
+        </div>
+      </section>
+
+      <footer>
+        <div class="muted">---</div>
+        <nav class="footer-nav" aria-label="Footer">
+          <span><a href="#api">API</a></span>
+          <span><a href="#example">EXAMPLE</a></span>
+          <span><a href="https://github.com/rainzee/st">GITHUB</a></span>
+          <span><a href="https://github.com/rainzee/st/issues">ISSUES</a></span>
+        </nav>
+        <div class="footer-meta">
+          <span>~*~ st 0.6.0. MIT licensed. ~*~</span>
+          <span>small core. typed graph. explicit ownership.</span>
+        </div>
+      </footer>
+    </main>
+  </body>
+</html>
