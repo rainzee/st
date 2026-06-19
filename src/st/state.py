@@ -1,8 +1,8 @@
 from collections.abc import Callable
 from typing import Literal
 
-from st.protocols import Observer
-from st.runtime import schedule_observer, track_dependency
+from st.protocols import Computation
+from st.runtime import schedule_computation, track_dependency
 
 type Equality[T] = Callable[[T, T], bool] | Literal[False]
 
@@ -25,7 +25,7 @@ class State[T]:
         else:
             self._equals = equals
 
-        self._observers: dict[Observer, None] = {}
+        self._subscribers: dict[Computation, None] = {}
 
     @property
     def value(self) -> T:
@@ -48,14 +48,14 @@ class State[T]:
 
         self._value = value
 
-        for observer in list(self._observers):
-            schedule_observer(observer)
+        for computation in list(self._subscribers):
+            schedule_computation(computation)
 
-    def _subscribe(self, observer: Observer) -> None:
-        self._observers[observer] = None
+    def _subscribe(self, computation: Computation) -> None:
+        self._subscribers[computation] = None
 
-    def _unsubscribe(self, observer: Observer) -> None:
-        self._observers.pop(observer, None)
+    def _unsubscribe(self, computation: Computation) -> None:
+        self._subscribers.pop(computation, None)
 
 
 def state[T](value: T, *, equals: Equality[T] = _default_equals) -> State[T]:

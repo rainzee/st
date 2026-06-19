@@ -1,7 +1,7 @@
 from collections.abc import Callable
 
-from st.protocols import Cleanup, Dependency
-from st.runtime import pop_observer, push_observer, run_cleanups
+from st.protocols import Cleanup, Source
+from st.runtime import pop_computation, push_computation, run_cleanups
 from st.scope import register_disposable
 
 
@@ -13,7 +13,7 @@ class Effect:
 
         self._function = function
         self._cleanups: list[Cleanup] = []
-        self._dependencies: set[Dependency] = set()
+        self._sources: set[Source] = set()
         self._disposed = False
         self._priority = 1
 
@@ -29,25 +29,25 @@ class Effect:
         except BaseException as error:
             cleanup_error = error
 
-        for dependency in self._dependencies:
-            dependency._unsubscribe(self)
-        self._dependencies.clear()
+        for source in self._sources:
+            source._unsubscribe(self)
+        self._sources.clear()
 
         if cleanup_error is not None:
             raise cleanup_error
 
-        push_observer(self)
+        push_computation(self)
         try:
             self._function()
         finally:
-            pop_observer()
+            pop_computation()
 
-    def _depend_on(self, dependency: Dependency) -> None:
-        if dependency in self._dependencies:
+    def _depend_on(self, source: Source) -> None:
+        if source in self._sources:
             return
 
-        self._dependencies.add(dependency)
-        dependency._subscribe(self)
+        self._sources.add(source)
+        source._subscribe(self)
 
     def _add_cleanup(self, cleanup: Cleanup) -> None:
         if self._disposed:
@@ -75,9 +75,9 @@ class Effect:
         except BaseException as error:
             cleanup_error = error
 
-        for dependency in self._dependencies:
-            dependency._unsubscribe(self)
-        self._dependencies.clear()
+        for source in self._sources:
+            source._unsubscribe(self)
+        self._sources.clear()
 
         if cleanup_error is not None:
             raise cleanup_error

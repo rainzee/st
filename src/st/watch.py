@@ -2,8 +2,8 @@ from collections.abc import Callable
 from inspect import Parameter, signature
 from typing import Protocol, TypeIs, cast, overload
 
-from st.protocols import Cleanup, Dependency
-from st.runtime import _pause_tracking, _restore_tracking, pop_observer, push_observer, run_cleanups
+from st.protocols import Cleanup, Source
+from st.runtime import _pause_tracking, _restore_tracking, pop_computation, push_computation, run_cleanups
 from st.scope import register_disposable
 
 
@@ -41,7 +41,7 @@ class Watch[T]:
             self._callback_with_cleanup = None
 
         self._immediate = immediate
-        self._dependencies: set[Dependency] = set()
+        self._sources: set[Source] = set()
         self._cleanups: list[Cleanup] = []
         self._disposed = False
         self._initialized = False
@@ -52,15 +52,15 @@ class Watch[T]:
         if self._disposed:
             return
 
-        for dependency in self._dependencies:
-            dependency._unsubscribe(self)
-        self._dependencies.clear()
+        for source in self._sources:
+            source._unsubscribe(self)
+        self._sources.clear()
 
-        push_observer(self)
+        push_computation(self)
         try:
             value = self._source()
         finally:
-            pop_observer()
+            pop_computation()
 
         if not self._initialized:
             self._initialized = True
@@ -76,12 +76,12 @@ class Watch[T]:
         self._run_callback(value, old)
         self._value = value
 
-    def _depend_on(self, dependency: Dependency) -> None:
-        if dependency in self._dependencies:
+    def _depend_on(self, source: Source) -> None:
+        if source in self._sources:
             return
 
-        self._dependencies.add(dependency)
-        dependency._subscribe(self)
+        self._sources.add(source)
+        source._subscribe(self)
 
     def _add_cleanup(self, cleanup: Cleanup) -> None:
         if self._disposed:
@@ -93,7 +93,7 @@ class Watch[T]:
     def _run_callback(self, value: T, old: T | None) -> None:
         self._run_cleanups()
 
-        active_observers = _pause_tracking()
+        active_computations = _pause_tracking()
         try:
             callback_with_cleanup = self._callback_with_cleanup
             if callback_with_cleanup is not None:
@@ -104,7 +104,7 @@ class Watch[T]:
             if callback is not None:
                 callback(value, old)
         finally:
-            _restore_tracking(active_observers)
+            _restore_tracking(active_computations)
 
     def _run_cleanups(self) -> None:
         run_cleanups(self._cleanups)
@@ -125,9 +125,9 @@ class Watch[T]:
         except BaseException as error:
             cleanup_error = error
 
-        for dependency in self._dependencies:
-            dependency._unsubscribe(self)
-        self._dependencies.clear()
+        for source in self._sources:
+            source._unsubscribe(self)
+        self._sources.clear()
 
         if cleanup_error is not None:
             raise cleanup_error

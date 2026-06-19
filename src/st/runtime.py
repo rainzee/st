@@ -1,10 +1,10 @@
 from typing import TypeIs
 
-from st.protocols import Cleanup, CleanupOwner, Dependency, Disposable, Observer, Peekable
+from st.protocols import Cleanup, CleanupTarget, Computation, Disposable, Peekable, Source
 
-_active_observers: list[Observer] = []
+_active_computations: list[Computation] = []
 _batch_depth = 0
-_pending_observers: dict[Observer, None] = {}
+_pending_computations: dict[Computation, None] = {}
 _is_flushing = False
 
 
@@ -29,42 +29,42 @@ def run_cleanups(cleanups: list[Cleanup]) -> None:
     raise BaseExceptionGroup("cleanup callbacks failed", exceptions)
 
 
-def track_dependency(dependency: Dependency) -> None:
-    if _active_observers:
-        _active_observers[-1]._depend_on(dependency)
+def track_dependency(source: Source) -> None:
+    if _active_computations:
+        _active_computations[-1]._depend_on(source)
 
 
-def push_observer(observer: Observer) -> None:
-    _active_observers.append(observer)
+def push_computation(computation: Computation) -> None:
+    _active_computations.append(computation)
 
 
-def pop_observer() -> None:
-    _active_observers.pop()
+def pop_computation() -> None:
+    _active_computations.pop()
 
 
-def get_active_observer() -> Observer | None:
-    if not _active_observers:
+def get_active_computation() -> Computation | None:
+    if not _active_computations:
         return None
 
-    return _active_observers[-1]
+    return _active_computations[-1]
 
 
-def owns_cleanup(observer: Observer) -> TypeIs[CleanupOwner]:
-    return hasattr(observer, "_add_cleanup")
+def collects_cleanup(computation: Computation) -> TypeIs[CleanupTarget]:
+    return hasattr(computation, "_add_cleanup")
 
 
-def schedule_observer(observer: Observer) -> None:
-    if observer in _active_observers:
+def schedule_computation(computation: Computation) -> None:
+    if computation in _active_computations:
         return
 
     if _batch_depth > 0 or _is_flushing:
-        _pending_observers[observer] = None
+        _pending_computations[computation] = None
         return
 
-    observer()
+    computation()
 
 
-def _flush_observers() -> None:
+def _flush_computations() -> None:
     global _is_flushing
 
     if _is_flushing:
@@ -72,10 +72,10 @@ def _flush_observers() -> None:
 
     _is_flushing = True
     try:
-        while _pending_observers:
-            observer = min(_pending_observers, key=lambda item: getattr(item, "_priority", 1))
-            del _pending_observers[observer]
-            observer()
+        while _pending_computations:
+            computation = min(_pending_computations, key=lambda item: item._priority)
+            del _pending_computations[computation]
+            computation()
     finally:
         _is_flushing = False
 
@@ -91,17 +91,17 @@ def _end_batch() -> None:
 
     _batch_depth -= 1
     if _batch_depth == 0:
-        _flush_observers()
+        _flush_computations()
 
 
-def _pause_tracking() -> list[Observer]:
-    active_observers = _active_observers.copy()
-    _active_observers.clear()
-    return active_observers
+def _pause_tracking() -> list[Computation]:
+    active_computations = _active_computations.copy()
+    _active_computations.clear()
+    return active_computations
 
 
-def _restore_tracking(active_observers: list[Observer]) -> None:
-    _active_observers[:] = active_observers
+def _restore_tracking(active_computations: list[Computation]) -> None:
+    _active_computations[:] = active_computations
 
 
 def peek[T](value: Peekable[T]) -> T:

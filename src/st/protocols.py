@@ -2,24 +2,26 @@ from collections.abc import Callable
 from typing import Protocol
 
 
-class Dependency(Protocol):
-    """Reactive value that can be observed by observers."""
+class Source(Protocol):
+    """Reactive value that can be tracked by computations."""
 
-    def _subscribe(self, observer: "Observer") -> None: ...
+    def _subscribe(self, computation: "Computation") -> None: ...
 
-    def _unsubscribe(self, observer: "Observer") -> None: ...
+    def _unsubscribe(self, computation: "Computation") -> None: ...
 
 
-class Observer(Protocol):
+class Computation(Protocol):
     """Reactive computation that tracks dependencies and can be scheduled."""
+
+    _priority: int
 
     def __call__(self) -> None: ...
 
-    def _depend_on(self, dependency: Dependency) -> None: ...
+    def _depend_on(self, source: Source) -> None: ...
 
 
-class CleanupOwner(Observer, Protocol):
-    """Observer that can own cleanup callbacks for its current run."""
+class CleanupTarget(Computation, Protocol):
+    """Computation that can collect cleanup callbacks for its current run."""
 
     def _add_cleanup(self, cleanup: "Cleanup") -> None: ...
 

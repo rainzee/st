@@ -1,10 +1,10 @@
 from collections.abc import Callable
 
-from st.protocols import Dependency, Observer
+from st.protocols import Computation, Source
 from st.runtime import (
-    pop_observer,
-    push_observer,
-    schedule_observer,
+    pop_computation,
+    push_computation,
+    schedule_computation,
     track_dependency,
 )
 from st.scope import register_disposable
@@ -17,8 +17,8 @@ class Computed[T]:
         """Create a computed value from a pure derivation function."""
 
         self._function = function
-        self._observers: dict[Observer, None] = {}
-        self._dependencies: set[Dependency] = set()
+        self._subscribers: dict[Computation, None] = {}
+        self._sources: set[Source] = set()
         self._initialized = False
         self._dirty = True
         self._value: T
@@ -32,12 +32,12 @@ class Computed[T]:
             return
 
         self._dirty = True
-        if not self._observers:
+        if not self._subscribers:
             return
 
         if self._recompute():
-            for observer in list(self._observers):
-                schedule_observer(observer)
+            for computation in list(self._subscribers):
+                schedule_computation(computation)
 
     @property
     def value(self) -> T:
@@ -61,16 +61,16 @@ class Computed[T]:
         return self._value
 
     def _recompute(self) -> bool:
-        for dependency in self._dependencies:
-            dependency._unsubscribe(self)
+        for source in self._sources:
+            source._unsubscribe(self)
 
-        self._dependencies.clear()
-        push_observer(self)
+        self._sources.clear()
+        push_computation(self)
 
         try:
             value = self._function()
         finally:
-            pop_observer()
+            pop_computation()
 
         self._dirty = False
         if self._initialized and value == self._value:
@@ -80,21 +80,21 @@ class Computed[T]:
         self._initialized = True
         return True
 
-    def _depend_on(self, dependency: Dependency) -> None:
-        if dependency in self._dependencies:
+    def _depend_on(self, source: Source) -> None:
+        if source in self._sources:
             return
 
-        self._dependencies.add(dependency)
-        dependency._subscribe(self)
+        self._sources.add(source)
+        source._subscribe(self)
 
-    def _subscribe(self, observer: Observer) -> None:
+    def _subscribe(self, computation: Computation) -> None:
         if self._disposed:
             return
 
-        self._observers[observer] = None
+        self._subscribers[computation] = None
 
-    def _unsubscribe(self, observer: Observer) -> None:
-        self._observers.pop(observer, None)
+    def _unsubscribe(self, computation: Computation) -> None:
+        self._subscribers.pop(computation, None)
 
     def dispose(self) -> None:
         """Stop this computed value from receiving future updates."""
@@ -107,11 +107,11 @@ class Computed[T]:
 
         self._disposed = True
 
-        for dependency in self._dependencies:
-            dependency._unsubscribe(self)
+        for source in self._sources:
+            source._unsubscribe(self)
 
-        self._dependencies.clear()
-        self._observers.clear()
+        self._sources.clear()
+        self._subscribers.clear()
 
 
 def computed[T](function: Callable[[], T]) -> Computed[T]:
