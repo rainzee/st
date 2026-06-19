@@ -18,13 +18,7 @@ class State[T]:
         """Create state with an initial value."""
 
         self._value = value
-        self._equals: Callable[[T, T], bool] | None
-
-        if equals is False:
-            self._equals = None
-        else:
-            self._equals = equals
-
+        self._equals = equals if equals else None
         self._subscribers: dict[Computation, None] = {}
 
     @property
@@ -36,9 +30,6 @@ class State[T]:
         """
 
         track_dependency(self)
-        return self._value
-
-    def _peek(self) -> T:
         return self._value
 
     @value.setter
@@ -56,6 +47,9 @@ class State[T]:
 
     def _unsubscribe(self, computation: Computation) -> None:
         self._subscribers.pop(computation, None)
+
+    def _peek(self) -> T:
+        return self._value
 
 
 def state[T](value: T, *, equals: Equality[T] = _default_equals) -> State[T]:
