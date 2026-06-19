@@ -4,6 +4,15 @@ Minimal reactive state for Python.
 
 ## Design
 
+`st` is built around a small idea: reactive state should feel ordinary in Python.
+Values are plain objects with a `.value`, derived state is lazy, and side effects
+are owned explicitly instead of hidden behind framework magic.
+
+The runtime favors a clear reactive graph over a large abstraction surface.
+Sources notify computations, computations track their sources, and scopes make
+ownership visible. Updates are synchronous and deterministic by default, so the
+mental model stays close to the code you write.
+
 - Small core. No runtime dependencies.
 - Signal-first model. State, derived state, and effects form the primitive graph.
 - Structural typing. Internal contracts use `Protocol`, not inheritance.
