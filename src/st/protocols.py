@@ -11,7 +11,7 @@ class Source(Protocol):
 
 
 class Computation(Protocol):
-    """Reactive computation that tracks dependencies and can be scheduled."""
+    """Reactive computation that tracks sources and can be scheduled."""
 
     _priority: int
 

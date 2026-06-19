@@ -6,7 +6,7 @@ from st.scope import register_disposable
 
 
 class Effect:
-    """Reactive side effect with automatic dependency tracking."""
+    """Reactive side effect with automatic source tracking."""
 
     def __init__(self, function: Callable[[], None]) -> None:
         """Create an effect wrapper without running it."""
@@ -18,7 +18,7 @@ class Effect:
         self._priority = 1
 
     def __call__(self) -> None:
-        """Run the effect and replace its tracked dependencies."""
+        """Run the effect and replace its tracked sources."""
 
         if self._disposed:
             return

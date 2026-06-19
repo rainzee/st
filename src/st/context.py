@@ -33,7 +33,7 @@ def untrack[T](function: Callable[[], T]) -> T: ...
 
 
 def untrack[T](function: Callable[[], T] | None = None) -> T | UntrackContext:
-    """Disable dependency tracking for a function or context block."""
+    """Disable source tracking for a function or context block."""
 
     context = UntrackContext()
     if function is None:

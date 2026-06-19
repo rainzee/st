@@ -5,13 +5,13 @@ from st.runtime import (
     pop_computation,
     push_computation,
     schedule_computation,
-    track_dependency,
+    track_source,
 )
 from st.scope import register_disposable
 
 
 class Computed[T]:
-    """Read-only state derived from reactive dependencies."""
+    """Read-only state derived from reactive sources."""
 
     def __init__(self, function: Callable[[], T]) -> None:
         """Create a computed value from a pure derivation function."""
@@ -26,7 +26,7 @@ class Computed[T]:
         self._priority = 0
 
     def __call__(self) -> None:
-        """Mark this computed value dirty when a dependency changes."""
+        """Mark this computed value dirty when a source changes."""
 
         if self._disposed:
             return
@@ -47,7 +47,7 @@ class Computed[T]:
         """
 
         if not self._disposed:
-            track_dependency(self)
+            track_source(self)
 
         if self._dirty:
             self._recompute()

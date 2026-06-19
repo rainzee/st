@@ -17,8 +17,8 @@ mental model stays close to the code you write.
 - Signal-first model. State, derived state, and effects form the primitive graph.
 - Structural typing. Internal contracts use `Protocol`, not inheritance.
 - Python 3.13 generics. `State[T]` and `Computed[T]` use PEP 695 syntax.
-- Dynamic dependencies. Effects replace their dependency set on each run.
-- Equality short-circuit. Unchanged values do not notify dependents.
+- Dynamic source tracking. Computations replace their source set on each run.
+- Equality short-circuit. Unchanged values do not notify subscribers.
 
 ## API
 
@@ -26,11 +26,11 @@ mental model stays close to the code you write.
 | --- | --- |
 | `state(value, *, equals=...)` | Create mutable reactive state. |
 | `computed(fn)` | Create lazy derived state. |
-| `effect(fn)` | Run a side effect with automatic dependency tracking. |
+| `effect(fn)` | Run a side effect with automatic source tracking. |
 | `watch(source, callback, *, immediate=False)` | Watch an explicit source with `new`, `old`, and optional cleanup. |
 | `readonly(value)` | Expose a read-only view of state or computed state. |
 | `batch()` | Coalesce updates and flush effects once. |
-| `untrack()` | Read reactive values without collecting dependencies. |
+| `untrack()` | Read reactive values without collecting sources. |
 | `peek(value)` | Read a reactive value without tracking. |
 | `scope()` | Own effects, computed values, watchers, and cleanup callbacks. |
 | `on_cleanup(fn)` | Register cleanup on the current effect or scope. |
@@ -260,7 +260,7 @@ Scheduling:
 Debugging:
 
 - runtime type guards
-- dependency inspection
+- source inspection
 - subscriber inspection
 - optional labels
 

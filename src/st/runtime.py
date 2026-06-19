@@ -29,7 +29,7 @@ def run_cleanups(cleanups: list[Cleanup]) -> None:
     raise BaseExceptionGroup("cleanup callbacks failed", exceptions)
 
 
-def track_dependency(source: Source) -> None:
+def track_source(source: Source) -> None:
     if _active_computations:
         _active_computations[-1]._depend_on(source)
 
@@ -105,7 +105,7 @@ def _restore_tracking(active_computations: list[Computation]) -> None:
 
 
 def peek[T](value: Peekable[T]) -> T:
-    """Read a reactive value without tracking it as a dependency."""
+    """Read a reactive value without tracking it as a source."""
 
     return value._peek()
 

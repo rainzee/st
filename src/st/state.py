@@ -2,7 +2,7 @@ from collections.abc import Callable
 from typing import Literal
 
 from st.protocols import Computation
-from st.runtime import schedule_computation, track_dependency
+from st.runtime import schedule_computation, track_source
 
 type Equality[T] = Callable[[T, T], bool] | Literal[False]
 
@@ -26,10 +26,10 @@ class State[T]:
         """Current value.
 
         Reads are tracked when an effect or computed value is active.
-        Writes notify dependents when the value changes.
+        Writes notify subscribed computations when the value changes.
         """
 
-        track_dependency(self)
+        track_source(self)
         return self._value
 
     @value.setter
