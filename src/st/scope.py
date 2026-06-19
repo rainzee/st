@@ -1,6 +1,7 @@
 from collections.abc import Callable
 
-from st.runtime import Cleanup, Disposable, get_active_effect, run_cleanups
+from st.protocols import Cleanup, Disposable
+from st.runtime import get_active_observer, owns_cleanup, run_cleanups
 
 
 _active_scopes: list["Scope"] = []
@@ -69,9 +70,9 @@ def scope() -> Scope:
 
 
 def register_cleanup(cleanup: Cleanup) -> None:
-    effect = get_active_effect()
-    if effect is not None:
-        effect._add_cleanup(cleanup)
+    observer = get_active_observer()
+    if observer is not None and owns_cleanup(observer):
+        observer._add_cleanup(cleanup)
         return
 
     if not _active_scopes:

@@ -2,7 +2,8 @@ from collections.abc import Callable
 from inspect import Parameter, signature
 from typing import Protocol, TypeIs, cast, overload
 
-from st.runtime import Cleanup, Dependency, _pause_tracking, _restore_tracking, pop_effect, push_effect, run_cleanups
+from st.protocols import Cleanup, Dependency
+from st.runtime import _pause_tracking, _restore_tracking, pop_observer, push_observer, run_cleanups
 from st.scope import register_disposable
 
 
@@ -55,11 +56,11 @@ class Watch[T]:
             dependency._unsubscribe(self)
         self._dependencies.clear()
 
-        push_effect(self)
+        push_observer(self)
         try:
             value = self._source()
         finally:
-            pop_effect()
+            pop_observer()
 
         if not self._initialized:
             self._initialized = True
@@ -92,7 +93,7 @@ class Watch[T]:
     def _run_callback(self, value: T, old: T | None) -> None:
         self._run_cleanups()
 
-        active_effects = _pause_tracking()
+        active_observers = _pause_tracking()
         try:
             callback_with_cleanup = self._callback_with_cleanup
             if callback_with_cleanup is not None:
@@ -103,7 +104,7 @@ class Watch[T]:
             if callback is not None:
                 callback(value, old)
         finally:
-            _restore_tracking(active_effects)
+            _restore_tracking(active_observers)
 
     def _run_cleanups(self) -> None:
         run_cleanups(self._cleanups)

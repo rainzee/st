@@ -1,11 +1,10 @@
 from collections.abc import Callable
 
+from st.protocols import Dependency, Observer
 from st.runtime import (
-    Dependency,
-    EffectLike,
-    pop_effect,
-    push_effect,
-    schedule_effect,
+    pop_observer,
+    push_observer,
+    schedule_observer,
     track_dependency,
 )
 from st.scope import register_disposable
@@ -18,7 +17,7 @@ class Computed[T]:
         """Create a computed value from a pure derivation function."""
 
         self._function = function
-        self._effects: dict[EffectLike, None] = {}
+        self._observers: dict[Observer, None] = {}
         self._dependencies: set[Dependency] = set()
         self._initialized = False
         self._dirty = True
@@ -33,12 +32,12 @@ class Computed[T]:
             return
 
         self._dirty = True
-        if not self._effects:
+        if not self._observers:
             return
 
         if self._recompute():
-            for effect in list(self._effects):
-                schedule_effect(effect)
+            for observer in list(self._observers):
+                schedule_observer(observer)
 
     @property
     def value(self) -> T:
@@ -66,12 +65,12 @@ class Computed[T]:
             dependency._unsubscribe(self)
 
         self._dependencies.clear()
-        push_effect(self)
+        push_observer(self)
 
         try:
             value = self._function()
         finally:
-            pop_effect()
+            pop_observer()
 
         self._dirty = False
         if self._initialized and value == self._value:
@@ -88,14 +87,14 @@ class Computed[T]:
         self._dependencies.add(dependency)
         dependency._subscribe(self)
 
-    def _subscribe(self, effect: EffectLike) -> None:
+    def _subscribe(self, observer: Observer) -> None:
         if self._disposed:
             return
 
-        self._effects[effect] = None
+        self._observers[observer] = None
 
-    def _unsubscribe(self, effect: EffectLike) -> None:
-        self._effects.pop(effect, None)
+    def _unsubscribe(self, observer: Observer) -> None:
+        self._observers.pop(observer, None)
 
     def dispose(self) -> None:
         """Stop this computed value from receiving future updates."""
@@ -112,7 +111,7 @@ class Computed[T]:
             dependency._unsubscribe(self)
 
         self._dependencies.clear()
-        self._effects.clear()
+        self._observers.clear()
 
 
 def computed[T](function: Callable[[], T]) -> Computed[T]:

@@ -1,18 +1,19 @@
 from collections.abc import Callable
 from typing import overload
 
-from st.runtime import EffectLike, _begin_batch, _end_batch, _pause_tracking, _restore_tracking
+from st.protocols import Observer
+from st.runtime import _begin_batch, _end_batch, _pause_tracking, _restore_tracking
 
 
 class UntrackContext:
     def __init__(self) -> None:
-        self._active_effects: list[EffectLike] = []
+        self._active_observers: list[Observer] = []
 
     def __enter__(self) -> None:
-        self._active_effects = _pause_tracking()
+        self._active_observers = _pause_tracking()
 
     def __exit__(self, *args: object) -> None:
-        _restore_tracking(self._active_effects)
+        _restore_tracking(self._active_observers)
 
 
 class BatchContext:

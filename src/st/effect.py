@@ -1,6 +1,7 @@
 from collections.abc import Callable
 
-from st.runtime import Cleanup, Dependency, pop_effect, push_effect, run_cleanups
+from st.protocols import Cleanup, Dependency
+from st.runtime import pop_observer, push_observer, run_cleanups
 from st.scope import register_disposable
 
 
@@ -35,11 +36,11 @@ class Effect:
         if cleanup_error is not None:
             raise cleanup_error
 
-        push_effect(self)
+        push_observer(self)
         try:
             self._function()
         finally:
-            pop_effect()
+            pop_observer()
 
     def _depend_on(self, dependency: Dependency) -> None:
         if dependency in self._dependencies:

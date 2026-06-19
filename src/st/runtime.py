@@ -1,35 +1,10 @@
-from collections.abc import Callable
-from typing import Protocol
+from typing import TypeIs
 
+from st.protocols import Cleanup, CleanupOwner, Dependency, Disposable, Observer, Peekable
 
-class Dependency(Protocol):
-    def _subscribe(self, effect: "EffectLike") -> None: ...
-
-    def _unsubscribe(self, effect: "EffectLike") -> None: ...
-
-
-class EffectLike(Protocol):
-    def __call__(self) -> None: ...
-
-    def _depend_on(self, dependency: Dependency) -> None: ...
-
-    def _add_cleanup(self, cleanup: "Cleanup") -> None: ...
-
-
-class Peekable[T](Protocol):
-    def _peek(self) -> T: ...
-
-
-class Disposable(Protocol):
-    def _dispose(self) -> None: ...
-
-
-type Cleanup = Callable[[], None]
-
-
-_active_effects: list[EffectLike] = []
+_active_observers: list[Observer] = []
 _batch_depth = 0
-_pending_effects: dict[EffectLike, None] = {}
+_pending_observers: dict[Observer, None] = {}
 _is_flushing = False
 
 
@@ -55,37 +30,41 @@ def run_cleanups(cleanups: list[Cleanup]) -> None:
 
 
 def track_dependency(dependency: Dependency) -> None:
-    if _active_effects:
-        _active_effects[-1]._depend_on(dependency)
+    if _active_observers:
+        _active_observers[-1]._depend_on(dependency)
 
 
-def push_effect(effect: EffectLike) -> None:
-    _active_effects.append(effect)
+def push_observer(observer: Observer) -> None:
+    _active_observers.append(observer)
 
 
-def pop_effect() -> None:
-    _active_effects.pop()
+def pop_observer() -> None:
+    _active_observers.pop()
 
 
-def get_active_effect() -> EffectLike | None:
-    if not _active_effects:
+def get_active_observer() -> Observer | None:
+    if not _active_observers:
         return None
 
-    return _active_effects[-1]
+    return _active_observers[-1]
 
 
-def schedule_effect(effect: EffectLike) -> None:
-    if effect in _active_effects:
+def owns_cleanup(observer: Observer) -> TypeIs[CleanupOwner]:
+    return hasattr(observer, "_add_cleanup")
+
+
+def schedule_observer(observer: Observer) -> None:
+    if observer in _active_observers:
         return
 
     if _batch_depth > 0 or _is_flushing:
-        _pending_effects[effect] = None
+        _pending_observers[observer] = None
         return
 
-    effect()
+    observer()
 
 
-def _flush_effects() -> None:
+def _flush_observers() -> None:
     global _is_flushing
 
     if _is_flushing:
@@ -93,10 +72,10 @@ def _flush_effects() -> None:
 
     _is_flushing = True
     try:
-        while _pending_effects:
-            effect = min(_pending_effects, key=lambda item: getattr(item, "_priority", 1))
-            del _pending_effects[effect]
-            effect()
+        while _pending_observers:
+            observer = min(_pending_observers, key=lambda item: getattr(item, "_priority", 1))
+            del _pending_observers[observer]
+            observer()
     finally:
         _is_flushing = False
 
@@ -112,17 +91,17 @@ def _end_batch() -> None:
 
     _batch_depth -= 1
     if _batch_depth == 0:
-        _flush_effects()
+        _flush_observers()
 
 
-def _pause_tracking() -> list[EffectLike]:
-    active_effects = _active_effects.copy()
-    _active_effects.clear()
-    return active_effects
+def _pause_tracking() -> list[Observer]:
+    active_observers = _active_observers.copy()
+    _active_observers.clear()
+    return active_observers
 
 
-def _restore_tracking(active_effects: list[EffectLike]) -> None:
-    _active_effects[:] = active_effects
+def _restore_tracking(active_observers: list[Observer]) -> None:
+    _active_observers[:] = active_observers
 
 
 def peek[T](value: Peekable[T]) -> T:
