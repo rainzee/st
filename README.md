@@ -27,7 +27,7 @@ mental model stays close to the code you write.
 | `state(value, *, equals=...)` | Create mutable reactive state. |
 | `computed(fn)` | Create lazy derived state. |
 | `effect(fn)` | Run a side effect with automatic source tracking. |
-| `watch(source, callback, *, immediate=False)` | Watch an explicit source with `new`, `old`, and optional cleanup. |
+| `watch(source, callback, *, immediate=False, equals=...)` | Watch an explicit source with `new`, `old`, custom equality, and optional cleanup. |
 | `readonly(value)` | Expose a read-only view of state or computed state. |
 | `batch()` | Coalesce updates and flush effects once. |
 | `untrack()` | Read reactive values without collecting sources. |
@@ -130,6 +130,24 @@ watch(lambda: count.value, lambda new, old: values.append((new, old)))
 count.value = 2
 
 assert values == [(2, 1)]
+```
+
+```python
+from st import state, watch
+
+count = state(1)
+values: list[tuple[int, int | None]] = []
+
+watch(
+    lambda: count.value,
+    lambda new, old: values.append((new, old)),
+    equals=lambda old, new: old % 2 == new % 2,
+)
+
+count.value = 3
+count.value = 4
+
+assert values == [(4, 1)]
 ```
 
 ```python

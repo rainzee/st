@@ -1,6 +1,6 @@
 from collections.abc import Callable
 from inspect import Parameter, signature
-from typing import Protocol, TypeIs, cast, overload
+from typing import Literal, Protocol, TypeIs, cast, overload
 
 from st.protocols import Cleanup, Source
 from st.runtime import _pause_tracking, _restore_tracking, pop_computation, push_computation, run_cleanups
@@ -8,7 +8,12 @@ from st.scope import register_disposable
 
 type WatchCleanup = Callable[[], None]
 type WatchCleanupRegistrar = Callable[[WatchCleanup], None]
+type WatchEquality[T] = Callable[[T, T], bool] | Literal[False]
 _UNSET = object()
+
+
+def _default_equals[T](old: T, new: T) -> bool:
+    return old == new
 
 
 class WatchCallback[T](Protocol):
@@ -28,6 +33,7 @@ class Watch[T]:
         callback: WatchCallback[T] | WatchCallbackWithCleanup[T],
         *,
         immediate: bool = False,
+        equals: WatchEquality[T] = _default_equals,
     ) -> None:
         self._source = source
         self._callback: WatchCallback[T] | None
@@ -40,6 +46,7 @@ class Watch[T]:
             self._callback_with_cleanup = None
 
         self._immediate = immediate
+        self._equals = equals if equals else None
         self._sources: set[Source] = set()
         self._cleanups: list[Cleanup] = []
         self._disposed = False
@@ -72,7 +79,7 @@ class Watch[T]:
             return
 
         old = cast(T, self._value)
-        if value == old:
+        if self._equals is not None and self._equals(old, value):
             return
 
         self._run_callback(value, old)
@@ -139,11 +146,23 @@ class Watch[T]:
 
 
 @overload
-def watch[T](source: Callable[[], T], callback: WatchCallback[T], *, immediate: bool = False) -> Watch[T]: ...
+def watch[T](
+    source: Callable[[], T],
+    callback: WatchCallback[T],
+    *,
+    immediate: bool = False,
+    equals: WatchEquality[T] = _default_equals,
+) -> Watch[T]: ...
 
 
 @overload
-def watch[T](source: Callable[[], T], callback: WatchCallbackWithCleanup[T], *, immediate: bool = False) -> Watch[T]: ...
+def watch[T](
+    source: Callable[[], T],
+    callback: WatchCallbackWithCleanup[T],
+    *,
+    immediate: bool = False,
+    equals: WatchEquality[T] = _default_equals,
+) -> Watch[T]: ...
 
 
 def watch[T](
@@ -151,10 +170,11 @@ def watch[T](
     callback: WatchCallback[T] | WatchCallbackWithCleanup[T],
     *,
     immediate: bool = False,
+    equals: WatchEquality[T] = _default_equals,
 ) -> Watch[T]:
     """Watch an explicit reactive source and call back with new and old values."""
 
-    watcher = Watch(source, callback, immediate=immediate)
+    watcher = Watch(source, callback, immediate=immediate, equals=equals)
     register_disposable(watcher)
 
     try:

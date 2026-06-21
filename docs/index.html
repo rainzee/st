@@ -383,6 +383,7 @@ assert values == [1, 2, -1]</code></pre>
           <p>
             <span class="ic">watch</span> tracks an explicit source and reports
             <span class="ic">new</span>, <span class="ic">old</span>, and optional cleanup.
+            Custom equality keeps selector-style watches focused on meaningful changes.
             <span class="ic">batch</span> coalesces updates and flushes effects once.
           </p>
           <p>
@@ -397,13 +398,17 @@ assert values == [1, 2, -1]</code></pre>
 count = state(1)
 events: list[tuple[int, int | None]] = []
 
-watch(lambda: count.value, lambda new, old: events.append((new, old)))
+watch(
+    lambda: count.value,
+    lambda new, old: events.append((new, old)),
+    equals=lambda old, new: old % 2 == new % 2,
+)
 
 with batch():
-    count.value = 2
     count.value = 3
+    count.value = 4
 
-assert events == [(3, 1)]</code></pre>
+assert events == [(4, 1)]</code></pre>
           <div class="callout">deterministic updates, one flush, no scheduler surprise.</div>
         </div>
       </section>
@@ -438,8 +443,8 @@ assert events == [(3, 1)]</code></pre>
               <td>Run a side effect with automatic source tracking.</td>
             </tr>
             <tr>
-              <td><span class="ic">watch(source, callback)</span></td>
-              <td>Watch an explicit source with new, old, and cleanup.</td>
+              <td><span class="ic">watch(source, callback, *, immediate=False, equals=...)</span></td>
+              <td>Watch an explicit source with new, old, custom equality, and cleanup.</td>
             </tr>
             <tr>
               <td><span class="ic">readonly(value)</span></td>

@@ -36,6 +36,29 @@ def test_watch_skips_equal_source_values() -> None:
     assert values == [(0, 1)]
 
 
+def test_watch_supports_custom_equality() -> None:
+    count = State(1)
+    values: list[tuple[int, int | None]] = []
+
+    watch(lambda: count.value, lambda new, old: values.append((new, old)), equals=lambda old, new: old % 2 == new % 2)
+
+    count.value = 3
+    count.value = 4
+
+    assert values == [(4, 1)]
+
+
+def test_watch_equals_false_always_calls_callback_when_source_invalidates() -> None:
+    count = State(1, equals=False)
+    values: list[tuple[int, int | None]] = []
+
+    watch(lambda: count.value, lambda new, old: values.append((new, old)), equals=False)
+
+    count.value = 1
+
+    assert values == [(1, 1)]
+
+
 def test_watch_only_tracks_the_source() -> None:
     source = State(1)
     other = State("a")
