@@ -6,7 +6,6 @@ from st.protocols import Cleanup, Source
 from st.runtime import _pause_tracking, _restore_tracking, pop_computation, push_computation, run_cleanups
 from st.scope import register_disposable
 
-
 type WatchCleanup = Callable[[], None]
 type WatchCleanupRegistrar = Callable[[WatchCleanup], None]
 _UNSET = object()
@@ -54,6 +53,7 @@ class Watch[T]:
 
         for source in self._sources:
             source._unsubscribe(self)
+
         self._sources.clear()
 
         push_computation(self)
@@ -65,8 +65,10 @@ class Watch[T]:
         if not self._initialized:
             self._initialized = True
             self._value = value
+
             if self._immediate:
                 self._run_callback(value, None)
+
             return
 
         old = cast(T, self._value)
@@ -94,6 +96,7 @@ class Watch[T]:
         self._run_cleanups()
 
         active_computations = _pause_tracking()
+
         try:
             callback_with_cleanup = self._callback_with_cleanup
             if callback_with_cleanup is not None:
@@ -120,6 +123,7 @@ class Watch[T]:
 
         self._disposed = True
         cleanup_error: BaseException | None = None
+
         try:
             self._run_cleanups()
         except BaseException as error:
@@ -127,6 +131,7 @@ class Watch[T]:
 
         for source in self._sources:
             source._unsubscribe(self)
+
         self._sources.clear()
 
         if cleanup_error is not None:
@@ -151,6 +156,7 @@ def watch[T](
 
     watcher = Watch(source, callback, immediate=immediate)
     register_disposable(watcher)
+
     try:
         watcher()
     except BaseException as error:
@@ -158,7 +164,6 @@ def watch[T](
             watcher._dispose()
         except BaseException as cleanup_error:
             raise BaseExceptionGroup("watch failed and cleanup failed", [error, cleanup_error]) from error
-
         raise
 
     return watcher
