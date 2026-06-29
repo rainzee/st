@@ -65,6 +65,12 @@
         color: var(--color-bg);
       }
 
+      button {
+        color: inherit;
+        font: inherit;
+        text-transform: inherit;
+      }
+
       p,
       h1,
       h2,
@@ -107,6 +113,45 @@
         display: flex;
         flex-direction: column;
         align-items: flex-end;
+      }
+
+      .language {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+      }
+
+      .language button {
+        padding: 0;
+        border: 0;
+        background: transparent;
+        color: var(--color-fg);
+        cursor: pointer;
+        letter-spacing: inherit;
+      }
+
+      .language button:hover,
+      .language button:focus {
+        outline: none;
+        background: var(--color-mark);
+        color: var(--color-bg);
+      }
+
+      .language-options {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        padding-top: 0.25rem;
+        background: var(--color-bg);
+      }
+
+      .language-options[hidden] {
+        display: none;
       }
 
       section {
@@ -266,21 +311,33 @@
           <a class="brand" href="#">ST</a>
         </div>
         <nav class="nav" aria-label="Primary">
-          <a href="#api">[ API ]</a>
-          <a href="#example">[ EXAMPLE ]</a>
-          <a href="https://github.com/rainzee/st">[ GITHUB ]</a>
+          <a href="#api" data-i18n="nav.api">[ API ]</a>
+          <a href="#example" data-i18n="nav.example">[ EXAMPLE ]</a>
+          <a href="https://github.com/rainzee/st" data-i18n="nav.github">[ GITHUB ]</a>
+          <div class="language">
+            <button
+              id="language-button"
+              type="button"
+              aria-haspopup="true"
+              aria-expanded="false"
+            >[ ENGLISH ]</button>
+            <div class="language-options" id="language-options" hidden>
+              <button type="button" data-language-option="en">[ ENGLISH ]</button>
+              <button type="button" data-language-option="zh">[ 中文 ]</button>
+            </div>
+          </div>
         </nav>
       </header>
 
       <section>
-        <h1 class="h-doc h-doc-1">MINIMAL REACTIVE STATE FOR PYTHON</h1>
+        <h1 class="h-doc h-doc-1" data-i18n="hero.title">MINIMAL REACTIVE STATE FOR PYTHON</h1>
         <div class="copy">
-          <p>
+          <p data-i18n-html="hero.copy1">
             <span class="ic">st</span> is a small, typed reactive state runtime for Python.
             Values are plain objects with a <span class="ic">.value</span>, derived state is lazy,
             and side effects are owned explicitly instead of hidden behind framework magic.
           </p>
-          <p>
+          <p data-i18n="hero.copy2">
             Sources notify computations, computations track their sources, and scopes make
             ownership visible. Updates are synchronous and deterministic by default, so the
             mental model stays close to the code you write.
@@ -289,19 +346,19 @@
         <div class="code-wrap">
           <pre class="code-block"><code>&gt; uv sync
 &gt; uv run python examples/shopping_cart.py</code></pre>
-          <div class="callout">zero runtime dependencies. Python &gt;= 3.13.</div>
+          <div class="callout" data-i18n="hero.callout">zero runtime dependencies. Python &gt;= 3.13.</div>
         </div>
       </section>
 
       <section id="graph">
-        <h2 class="h-doc h-doc-2">THE GRAPH</h2>
+        <h2 class="h-doc h-doc-2" data-i18n="graph.title">THE GRAPH</h2>
         <div class="copy">
-          <p>
+          <p data-i18n-html="graph.copy1">
             Three primitives form the reactive graph: <span class="ic">state</span> for mutable
             sources, <span class="ic">computed</span> for lazy derived values, and
             <span class="ic">effect</span> for tracked side effects.
           </p>
-          <p>
+          <p data-i18n="graph.copy2">
             Computations replace their source set on each run. Unchanged values short-circuit
             equality checks, so subscribers only hear about meaningful changes.
           </p>
@@ -328,7 +385,7 @@
 batch() groups writes ---------------&gt;  | scope() / dispose()    |
 flush once, then run dependents          | explicit lifetime      |
                                          +------------------------+</code></pre>
-          <div class="callout">read collects sources. write marks dependents dirty. ownership stays visible.</div>
+          <div class="callout" data-i18n="graph.callout">read collects sources. write marks dependents dirty. ownership stays visible.</div>
         </div>
         <div class="code-wrap">
           <pre class="code-block"><code>from st import computed, effect, state
@@ -347,13 +404,13 @@ assert seen == [2, 4]</code></pre>
       </section>
 
       <section id="ownership">
-        <h2 class="h-doc h-doc-2">EXPLICIT OWNERSHIP</h2>
+        <h2 class="h-doc h-doc-2" data-i18n="ownership.title">EXPLICIT OWNERSHIP</h2>
         <div class="copy">
-          <p>
+          <p data-i18n-html="ownership.copy1">
             Effects, computed values, watchers, and cleanup callbacks can belong to a
             <span class="ic">scope</span>. A scope gives reactive work a visible lifetime.
           </p>
-          <p>
+          <p data-i18n-html="ownership.copy2">
             Cleanup is ordinary Python: register it with <span class="ic">on_cleanup</span>,
             stop resources with <span class="ic">dispose</span>, or let the owning scope close them.
           </p>
@@ -378,15 +435,15 @@ assert values == [1, 2, -1]</code></pre>
       </section>
 
       <section id="watch">
-        <h2 class="h-doc h-doc-2">WATCH WHAT YOU MEAN</h2>
+        <h2 class="h-doc h-doc-2" data-i18n="watch.title">WATCH WHAT YOU MEAN</h2>
         <div class="copy">
-          <p>
+          <p data-i18n-html="watch.copy1">
             <span class="ic">watch</span> tracks an explicit source and reports
             <span class="ic">new</span>, <span class="ic">old</span>, and optional cleanup.
             Custom equality keeps selector-style watches focused on meaningful changes.
             <span class="ic">batch</span> coalesces updates and flushes effects once.
           </p>
-          <p>
+          <p data-i18n-html="watch.copy2">
             When reads should not become dependencies, use <span class="ic">untrack</span>
             or <span class="ic">peek</span>. The graph stays precise because dependency collection
             is something you can see.
@@ -409,14 +466,14 @@ with batch():
     count.value = 4
 
 assert events == [(4, 1)]</code></pre>
-          <div class="callout">deterministic updates, one flush, no scheduler surprise.</div>
+          <div class="callout" data-i18n="watch.callout">deterministic updates, one flush, no scheduler surprise.</div>
         </div>
       </section>
 
       <section id="api">
-        <h2 class="h-doc h-doc-2">ONE SMALL SURFACE</h2>
+        <h2 class="h-doc h-doc-2" data-i18n="api.title">ONE SMALL SURFACE</h2>
         <div class="copy">
-          <p>
+          <p data-i18n-html="api.copy1">
             The public API is deliberately compact. The runtime uses structural typing
             internally and PEP 695-style generics for <span class="ic">State[T]</span> and
             <span class="ic">Computed[T]</span>.
@@ -425,55 +482,55 @@ assert events == [(4, 1)]</code></pre>
         <table class="api-table">
           <thead>
             <tr>
-              <th>API</th>
-              <th>Purpose</th>
+              <th data-i18n="api.table.api">API</th>
+              <th data-i18n="api.table.purpose">Purpose</th>
             </tr>
           </thead>
           <tbody>
             <tr>
               <td><span class="ic">state(value, *, equals=...)</span></td>
-              <td>Create mutable reactive state.</td>
+              <td data-i18n="api.table.state">Create mutable reactive state.</td>
             </tr>
             <tr>
               <td><span class="ic">computed(fn)</span></td>
-              <td>Create lazy derived state.</td>
+              <td data-i18n="api.table.computed">Create lazy derived state.</td>
             </tr>
             <tr>
               <td><span class="ic">effect(fn)</span></td>
-              <td>Run a side effect with automatic source tracking.</td>
+              <td data-i18n="api.table.effect">Run a side effect with automatic source tracking.</td>
             </tr>
             <tr>
               <td><span class="ic">watch(source, callback, *, immediate=False, equals=...)</span></td>
-              <td>Watch an explicit source with new, old, custom equality, and cleanup.</td>
+              <td data-i18n="api.table.watch">Watch an explicit source with new, old, custom equality, and cleanup.</td>
             </tr>
             <tr>
               <td><span class="ic">readonly(value)</span></td>
-              <td>Expose a read-only view of state or computed state.</td>
+              <td data-i18n="api.table.readonly">Expose a read-only view of state or computed state.</td>
             </tr>
             <tr>
               <td><span class="ic">batch()</span></td>
-              <td>Coalesce updates and flush effects once.</td>
+              <td data-i18n="api.table.batch">Coalesce updates and flush effects once.</td>
             </tr>
             <tr>
               <td><span class="ic">untrack()</span> / <span class="ic">peek(value)</span></td>
-              <td>Read reactive values without collecting sources.</td>
+              <td data-i18n="api.table.untrack">Read reactive values without collecting sources.</td>
             </tr>
             <tr>
               <td><span class="ic">scope()</span> / <span class="ic">dispose(value)</span></td>
-              <td>Own and stop reactive resources explicitly.</td>
+              <td data-i18n="api.table.scope">Own and stop reactive resources explicitly.</td>
             </tr>
           </tbody>
         </table>
       </section>
 
       <section id="example">
-        <h2 class="h-doc h-doc-2">SHOPPING CART EXAMPLE</h2>
+        <h2 class="h-doc h-doc-2" data-i18n="example.title">SHOPPING CART EXAMPLE</h2>
         <div class="copy">
-          <p>
+          <p data-i18n="example.copy1">
             The example app combines cart lines, coupon validation, checkout readiness,
             scoped cleanup, untracked analytics snapshots, and batched updates.
           </p>
-          <p>
+          <p data-i18n="example.copy2">
             It is intentionally plain Python: dataclasses, dictionaries, functions, and a
             reactive layer small enough to inspect in one sitting.
           </p>
@@ -491,18 +548,18 @@ can_checkout = computed(
     lambda: item_count.value &gt; 0
     and all(line.quantity &lt;= INVENTORY.get(line.sku, 0) for line in cart.value.values())
 )</code></pre>
-          <div class="callout">full source: examples/shopping_cart.py</div>
+          <div class="callout" data-i18n="example.callout">full source: examples/shopping_cart.py</div>
         </div>
       </section>
 
       <section id="roadmap">
-        <h2 class="h-doc h-doc-2">ROADMAP</h2>
+        <h2 class="h-doc h-doc-2" data-i18n="roadmap.title">ROADMAP</h2>
         <div class="copy">
-          <p>Core infrastructure is in place: dispose, untrack, peek, batch, and cleanup.</p>
+          <p data-i18n="roadmap.copy1">Core infrastructure is in place: dispose, untrack, peek, batch, and cleanup.</p>
           <ul>
-            <li><span class="ic">scheduling</span> - custom effect schedulers, queued flush, next_tick</li>
-            <li><span class="ic">debugging</span> - runtime type guards, source inspection, subscriber inspection</li>
-            <li><span class="ic">labels</span> - optional names for state, computed values, effects, and scopes</li>
+            <li data-i18n-html="roadmap.item1"><span class="ic">scheduling</span> - custom effect schedulers, queued flush, next_tick</li>
+            <li data-i18n-html="roadmap.item2"><span class="ic">debugging</span> - runtime type guards, source inspection, subscriber inspection</li>
+            <li data-i18n-html="roadmap.item3"><span class="ic">labels</span> - optional names for state, computed values, effects, and scopes</li>
           </ul>
         </div>
       </section>
@@ -510,16 +567,173 @@ can_checkout = computed(
       <footer>
         <div class="muted">---</div>
         <nav class="footer-nav" aria-label="Footer">
-          <span><a href="#api">API</a></span>
-          <span><a href="#example">EXAMPLE</a></span>
-          <span><a href="https://github.com/rainzee/st">GITHUB</a></span>
-          <span><a href="https://github.com/rainzee/st/issues">ISSUES</a></span>
+          <span><a href="#api" data-i18n="footer.api">API</a></span>
+          <span><a href="#example" data-i18n="footer.example">EXAMPLE</a></span>
+          <span><a href="https://github.com/rainzee/st" data-i18n="footer.github">GITHUB</a></span>
+          <span><a href="https://github.com/rainzee/st/issues" data-i18n="footer.issues">ISSUES</a></span>
         </nav>
         <div class="footer-meta">
-          <span>~*~ st 0.6.0. MIT licensed. ~*~</span>
-          <span>small core. typed graph. explicit ownership.</span>
+          <span data-i18n="footer.license">~*~ st 0.6.0. MIT licensed. ~*~</span>
+          <span data-i18n="footer.tagline">small core. typed graph. explicit ownership.</span>
         </div>
       </footer>
     </main>
+    <script>
+      const translations = {
+        en: {
+          "nav.api": "[ API ]",
+          "nav.example": "[ EXAMPLE ]",
+          "nav.github": "[ GITHUB ]",
+          "hero.title": "MINIMAL REACTIVE STATE FOR PYTHON",
+          "hero.copy1": '<span class="ic">st</span> is a small, typed reactive state runtime for Python. Values are plain objects with a <span class="ic">.value</span>, derived state is lazy, and side effects are owned explicitly instead of hidden behind framework magic.',
+          "hero.copy2": "Sources notify computations, computations track their sources, and scopes make ownership visible. Updates are synchronous and deterministic by default, so the mental model stays close to the code you write.",
+          "hero.callout": "zero runtime dependencies. Python >= 3.13.",
+          "graph.title": "THE GRAPH",
+          "graph.copy1": 'Three primitives form the reactive graph: <span class="ic">state</span> for mutable sources, <span class="ic">computed</span> for lazy derived values, and <span class="ic">effect</span> for tracked side effects.',
+          "graph.copy2": "Computations replace their source set on each run. Unchanged values short-circuit equality checks, so subscribers only hear about meaningful changes.",
+          "graph.callout": "read collects sources. write marks dependents dirty. ownership stays visible.",
+          "ownership.title": "EXPLICIT OWNERSHIP",
+          "ownership.copy1": 'Effects, computed values, watchers, and cleanup callbacks can belong to a <span class="ic">scope</span>. A scope gives reactive work a visible lifetime.',
+          "ownership.copy2": 'Cleanup is ordinary Python: register it with <span class="ic">on_cleanup</span>, stop resources with <span class="ic">dispose</span>, or let the owning scope close them.',
+          "watch.title": "WATCH WHAT YOU MEAN",
+          "watch.copy1": '<span class="ic">watch</span> tracks an explicit source and reports <span class="ic">new</span>, <span class="ic">old</span>, and optional cleanup. Custom equality keeps selector-style watches focused on meaningful changes. <span class="ic">batch</span> coalesces updates and flushes effects once.',
+          "watch.copy2": 'When reads should not become dependencies, use <span class="ic">untrack</span> or <span class="ic">peek</span>. The graph stays precise because dependency collection is something you can see.',
+          "watch.callout": "deterministic updates, one flush, no scheduler surprise.",
+          "api.title": "ONE SMALL SURFACE",
+          "api.copy1": 'The public API is deliberately compact. The runtime uses structural typing internally and PEP 695-style generics for <span class="ic">State[T]</span> and <span class="ic">Computed[T]</span>.',
+          "api.table.api": "API",
+          "api.table.purpose": "Purpose",
+          "api.table.state": "Create mutable reactive state.",
+          "api.table.computed": "Create lazy derived state.",
+          "api.table.effect": "Run a side effect with automatic source tracking.",
+          "api.table.watch": "Watch an explicit source with new, old, custom equality, and cleanup.",
+          "api.table.readonly": "Expose a read-only view of state or computed state.",
+          "api.table.batch": "Coalesce updates and flush effects once.",
+          "api.table.untrack": "Read reactive values without collecting sources.",
+          "api.table.scope": "Own and stop reactive resources explicitly.",
+          "example.title": "SHOPPING CART EXAMPLE",
+          "example.copy1": "The example app combines cart lines, coupon validation, checkout readiness, scoped cleanup, untracked analytics snapshots, and batched updates.",
+          "example.copy2": "It is intentionally plain Python: dataclasses, dictionaries, functions, and a reactive layer small enough to inspect in one sitting.",
+          "example.callout": "full source: examples/shopping_cart.py",
+          "roadmap.title": "ROADMAP",
+          "roadmap.copy1": "Core infrastructure is in place: dispose, untrack, peek, batch, and cleanup.",
+          "roadmap.item1": '<span class="ic">scheduling</span> - custom effect schedulers, queued flush, next_tick',
+          "roadmap.item2": '<span class="ic">debugging</span> - runtime type guards, source inspection, subscriber inspection',
+          "roadmap.item3": '<span class="ic">labels</span> - optional names for state, computed values, effects, and scopes',
+          "footer.api": "API",
+          "footer.example": "EXAMPLE",
+          "footer.github": "GITHUB",
+          "footer.issues": "ISSUES",
+          "footer.license": "~*~ st 0.6.0. MIT licensed. ~*~",
+          "footer.tagline": "small core. typed graph. explicit ownership.",
+        },
+        zh: {
+          "nav.api": "[ API ]",
+          "nav.example": "[ 示例 ]",
+          "nav.github": "[ GITHUB ]",
+          "hero.title": "面向 PYTHON 的极简响应式状态",
+          "hero.copy1": '<span class="ic">st</span> 是一个小巧、带类型的 Python 响应式状态运行时。值是带有 <span class="ic">.value</span> 的普通对象，派生状态按需计算，副作用由你显式拥有，而不是藏在框架魔法里。',
+          "hero.copy2": "源会通知计算，计算会追踪自己的源，作用域让所有权清晰可见。更新默认同步且确定，所以心智模型会贴近你写下的代码。",
+          "hero.callout": "零运行时依赖。Python >= 3.13。",
+          "graph.title": "响应式图",
+          "graph.copy1": '三个原语组成响应式图：<span class="ic">state</span> 表示可变源，<span class="ic">computed</span> 表示惰性的派生值，<span class="ic">effect</span> 表示被追踪的副作用。',
+          "graph.copy2": "每次运行时，计算都会替换自己的源集合。未变化的值会被相等性检查短路，所以订阅者只会收到有意义的变化。",
+          "graph.callout": "读取会收集源。写入会标记依赖项为脏。所有权保持可见。",
+          "ownership.title": "显式所有权",
+          "ownership.copy1": '副作用、计算值、监听器和清理回调都可以归属于一个 <span class="ic">scope</span>。作用域让响应式工作的生命周期清晰可见。',
+          "ownership.copy2": '清理就是普通 Python：用 <span class="ic">on_cleanup</span> 注册，用 <span class="ic">dispose</span> 停止资源，或交给拥有它们的作用域关闭。',
+          "watch.title": "精确监听",
+          "watch.copy1": '<span class="ic">watch</span> 会追踪一个显式源，并报告 <span class="ic">new</span>、<span class="ic">old</span> 以及可选的清理逻辑。自定义相等性让选择器式监听只关注真正有意义的变化。<span class="ic">batch</span> 会合并更新并只刷新一次副作用。',
+          "watch.copy2": '当读取不应该成为依赖时，使用 <span class="ic">untrack</span> 或 <span class="ic">peek</span>。依赖收集是你能看见的机制，所以图会保持精确。',
+          "watch.callout": "确定性更新，一次刷新，没有调度器意外。",
+          "api.title": "小而完整的 API",
+          "api.copy1": '公共 API 刻意保持紧凑。运行时内部使用结构化类型，并为 <span class="ic">State[T]</span> 和 <span class="ic">Computed[T]</span> 使用 PEP 695 风格的泛型。',
+          "api.table.api": "API",
+          "api.table.purpose": "用途",
+          "api.table.state": "创建可变的响应式状态。",
+          "api.table.computed": "创建惰性的派生状态。",
+          "api.table.effect": "运行一个会自动追踪源的副作用。",
+          "api.table.watch": "监听一个显式源，获得新值、旧值、自定义相等性和清理能力。",
+          "api.table.readonly": "暴露状态或计算状态的只读视图。",
+          "api.table.batch": "合并更新，并只刷新一次副作用。",
+          "api.table.untrack": "读取响应式值，但不收集依赖源。",
+          "api.table.scope": "显式拥有并停止响应式资源。",
+          "example.title": "购物车示例",
+          "example.copy1": "示例应用组合了购物车条目、优惠码验证、结账可用性、作用域清理、未追踪的分析快照和批量更新。",
+          "example.copy2": "它刻意保持朴素的 Python 风格：dataclass、字典、函数，以及一个小到可以一次读完的响应式层。",
+          "example.callout": "完整源码：examples/shopping_cart.py",
+          "roadmap.title": "路线图",
+          "roadmap.copy1": "核心基础设施已经就绪：dispose、untrack、peek、batch 和 cleanup。",
+          "roadmap.item1": '<span class="ic">scheduling</span> - 自定义 effect 调度器、队列刷新、next_tick',
+          "roadmap.item2": '<span class="ic">debugging</span> - 运行时类型守卫、源检查、订阅者检查',
+          "roadmap.item3": '<span class="ic">labels</span> - 为状态、计算值、副作用和作用域提供可选名称',
+          "footer.api": "API",
+          "footer.example": "示例",
+          "footer.github": "GITHUB",
+          "footer.issues": "问题",
+          "footer.license": "~*~ st 0.6.0. MIT 许可。~*~",
+          "footer.tagline": "小核心。类型化图。显式所有权。",
+        },
+      };
+
+      const languageButton = document.getElementById("language-button");
+      const languageOptions = document.getElementById("language-options");
+
+      function setLanguage(language) {
+        const strings = translations[language] || translations.en;
+
+        document.documentElement.lang = language === "zh" ? "zh-CN" : "en";
+        document.title = language === "zh"
+          ? "st - 面向 Python 的极简响应式状态"
+          : "st - Minimal reactive state for Python";
+
+        document.querySelectorAll("[data-i18n]").forEach((element) => {
+          const key = element.getAttribute("data-i18n");
+          element.textContent = strings[key] || translations.en[key] || "";
+        });
+
+        document.querySelectorAll("[data-i18n-html]").forEach((element) => {
+          const key = element.getAttribute("data-i18n-html");
+          element.innerHTML = strings[key] || translations.en[key] || "";
+        });
+
+        languageButton.textContent = language === "zh" ? "[ 中文 ]" : "[ ENGLISH ]";
+      }
+
+      function setLanguageMenuOpen(isOpen) {
+        languageOptions.hidden = !isOpen;
+        languageButton.setAttribute("aria-expanded", String(isOpen));
+      }
+
+      languageButton.addEventListener("click", () => {
+        setLanguageMenuOpen(languageOptions.hidden);
+      });
+
+      languageOptions.addEventListener("click", (event) => {
+        const option = event.target.closest("[data-language-option]");
+
+        if (!option) {
+          return;
+        }
+
+        setLanguage(option.getAttribute("data-language-option"));
+        setLanguageMenuOpen(false);
+      });
+
+      document.addEventListener("click", (event) => {
+        if (!event.target.closest(".language")) {
+          setLanguageMenuOpen(false);
+        }
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          setLanguageMenuOpen(false);
+          languageButton.focus();
+        }
+      });
+
+      setLanguage("en");
+    </script>
   </body>
 </html>
