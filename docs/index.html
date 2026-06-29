@@ -324,6 +324,7 @@
             <div class="language-options" id="language-options" hidden>
               <button type="button" data-language-option="en">[ ENGLISH ]</button>
               <button type="button" data-language-option="zh">[ 中文 ]</button>
+              <button type="button" data-language-option="ja">[ 日本語 ]</button>
             </div>
           </div>
         </nav>
@@ -674,6 +675,53 @@ can_checkout = computed(
           "footer.license": "~*~ st 0.6.0. MIT 许可。~*~",
           "footer.tagline": "小核心。类型化图。显式所有权。",
         },
+        ja: {
+          "nav.api": "[ API ]",
+          "nav.example": "[ 例 ]",
+          "nav.github": "[ GITHUB ]",
+          "hero.title": "PYTHON のための最小限のリアクティブ状態",
+          "hero.copy1": '<span class="ic">st</span> は、小さく型付きの Python 向けリアクティブ状態ランタイムです。値は <span class="ic">.value</span> を持つ普通のオブジェクトで、派生状態は遅延評価され、副作用はフレームワークの魔法に隠されず明示的に所有されます。',
+          "hero.copy2": "ソースは計算に通知し、計算は自分のソースを追跡し、スコープは所有権を見える形にします。更新はデフォルトで同期的かつ決定的なので、メンタルモデルは書いたコードに近いままです。",
+          "hero.callout": "実行時依存はゼロ。Python >= 3.13。",
+          "graph.title": "リアクティブグラフ",
+          "graph.copy1": 'リアクティブグラフは 3 つのプリミティブで構成されます。可変ソースの <span class="ic">state</span>、遅延評価される派生値の <span class="ic">computed</span>、追跡される副作用の <span class="ic">effect</span> です。',
+          "graph.copy2": "計算は実行のたびにソース集合を置き換えます。変化していない値は等価性チェックで短絡されるため、購読者には意味のある変更だけが届きます。",
+          "graph.callout": "読み取りはソースを収集します。書き込みは依存先を dirty にします。所有権は見えるままです。",
+          "ownership.title": "明示的な所有権",
+          "ownership.copy1": '副作用、計算値、ウォッチャー、クリーンアップコールバックは <span class="ic">scope</span> に所属できます。スコープはリアクティブな処理のライフタイムを見える形にします。',
+          "ownership.copy2": 'クリーンアップは普通の Python です。<span class="ic">on_cleanup</span> で登録し、<span class="ic">dispose</span> でリソースを停止し、または所有するスコープに閉じさせます。',
+          "watch.title": "意図したものを監視",
+          "watch.copy1": '<span class="ic">watch</span> は明示的なソースを追跡し、<span class="ic">new</span>、<span class="ic">old</span>、任意のクリーンアップを報告します。カスタム等価性により、セレクター型の監視は意味のある変更だけに集中できます。<span class="ic">batch</span> は更新をまとめ、副作用を一度だけ flush します。',
+          "watch.copy2": '読み取りを依存関係にしたくない場合は、<span class="ic">untrack</span> または <span class="ic">peek</span> を使います。依存関係の収集は目に見える仕組みなので、グラフは正確に保たれます。',
+          "watch.callout": "決定的な更新、一度の flush、スケジューラの驚きなし。",
+          "api.title": "小さくまとまった API",
+          "api.copy1": '公開 API は意図的にコンパクトです。ランタイム内部では構造的型付けを使い、<span class="ic">State[T]</span> と <span class="ic">Computed[T]</span> には PEP 695 スタイルのジェネリクスを使います。',
+          "api.table.api": "API",
+          "api.table.purpose": "目的",
+          "api.table.state": "可変のリアクティブ状態を作成します。",
+          "api.table.computed": "遅延評価される派生状態を作成します。",
+          "api.table.effect": "ソースを自動追跡する副作用を実行します。",
+          "api.table.watch": "明示的なソースを監視し、新しい値、古い値、カスタム等価性、クリーンアップを扱います。",
+          "api.table.readonly": "状態または計算状態の読み取り専用ビューを公開します。",
+          "api.table.batch": "更新をまとめ、副作用を一度だけ flush します。",
+          "api.table.untrack": "ソースを収集せずにリアクティブ値を読み取ります。",
+          "api.table.scope": "リアクティブなリソースを明示的に所有し停止します。",
+          "example.title": "ショッピングカートの例",
+          "example.copy1": "このサンプルアプリは、カート行、クーポン検証、チェックアウト可能性、スコープ付きクリーンアップ、追跡しない分析スナップショット、バッチ更新を組み合わせています。",
+          "example.copy2": "意図的に素朴な Python です。dataclass、辞書、関数、そして一度で読み切れるほど小さなリアクティブ層でできています。",
+          "example.callout": "完全なソース: examples/shopping_cart.py",
+          "roadmap.title": "ロードマップ",
+          "roadmap.copy1": "コア基盤はすでに揃っています: dispose、untrack、peek、batch、cleanup。",
+          "roadmap.item1": '<span class="ic">scheduling</span> - カスタム effect スケジューラ、キューによる flush、next_tick',
+          "roadmap.item2": '<span class="ic">debugging</span> - 実行時型ガード、ソース検査、購読者検査',
+          "roadmap.item3": '<span class="ic">labels</span> - 状態、計算値、副作用、スコープの任意名',
+          "footer.api": "API",
+          "footer.example": "例",
+          "footer.github": "GITHUB",
+          "footer.issues": "ISSUES",
+          "footer.license": "~*~ st 0.6.0. MIT ライセンス。~*~",
+          "footer.tagline": "小さなコア。型付きグラフ。明示的な所有権。",
+        },
       };
 
       const languageButton = document.getElementById("language-button");
@@ -682,10 +730,27 @@ can_checkout = computed(
       function setLanguage(language) {
         const strings = translations[language] || translations.en;
 
-        document.documentElement.lang = language === "zh" ? "zh-CN" : "en";
-        document.title = language === "zh"
-          ? "st - 面向 Python 的极简响应式状态"
-          : "st - Minimal reactive state for Python";
+        const languageMeta = {
+          en: {
+            button: "[ ENGLISH ]",
+            htmlLang: "en",
+            title: "st - Minimal reactive state for Python",
+          },
+          zh: {
+            button: "[ 中文 ]",
+            htmlLang: "zh-CN",
+            title: "st - 面向 Python 的极简响应式状态",
+          },
+          ja: {
+            button: "[ 日本語 ]",
+            htmlLang: "ja",
+            title: "st - Python のための最小限のリアクティブ状態",
+          },
+        };
+        const meta = languageMeta[language] || languageMeta.en;
+
+        document.documentElement.lang = meta.htmlLang;
+        document.title = meta.title;
 
         document.querySelectorAll("[data-i18n]").forEach((element) => {
           const key = element.getAttribute("data-i18n");
@@ -697,7 +762,7 @@ can_checkout = computed(
           element.innerHTML = strings[key] || translations.en[key] || "";
         });
 
-        languageButton.textContent = language === "zh" ? "[ 中文 ]" : "[ ENGLISH ]";
+        languageButton.textContent = meta.button;
       }
 
       function setLanguageMenuOpen(isOpen) {
