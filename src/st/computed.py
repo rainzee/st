@@ -117,6 +117,6 @@ class Computed[T]:
 def computed[T](function: Callable[[], T]) -> Computed[T]:
     """Create a read-only derived state."""
 
-    computed_ = Computed(function)
-    register_disposable(computed_)
-    return computed_
+    computed = Computed(function)
+    register_disposable(computed)
+    return computed
