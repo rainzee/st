@@ -328,6 +328,7 @@
               <button type="button" data-language-option="zh">[ 中文 ]</button>
               <button type="button" data-language-option="ja">[ 日本語 ]</button>
               <button type="button" data-language-option="ru">[ РУССКИЙ ]</button>
+              <button type="button" data-language-option="fr">[ FRANÇAIS ]</button>
             </div>
           </div>
         </nav>
@@ -772,6 +773,53 @@ can_checkout = computed(
           "footer.license": "~*~ st 0.6.0. MIT license. ~*~",
           "footer.tagline": "маленькое ядро. типизированный граф. явное владение.",
         },
+        fr: {
+          "nav.api": "[ API ]",
+          "nav.example": "[ EXEMPLE ]",
+          "nav.github": "[ GITHUB ]",
+          "hero.title": "ÉTAT RÉACTIF MINIMAL POUR PYTHON",
+          "hero.copy1": '<span class="ic">st</span> est un petit runtime d état réactif typé pour Python. Les valeurs restent des objets ordinaires avec <span class="ic">.value</span>, l état dérivé est paresseux, et les effets de bord sont possédés explicitement plutôt que cachés derrière la magie d un framework.',
+          "hero.copy2": "Les sources notifient les calculs, les calculs suivent leurs sources, et les scopes rendent la possession visible. Les mises à jour sont synchrones et déterministes par défaut, donc le modèle mental reste proche du code que vous écrivez.",
+          "hero.callout": "aucune dépendance runtime. Python >= 3.13.",
+          "graph.title": "LE GRAPHE",
+          "graph.copy1": 'Trois primitives forment le graphe réactif : <span class="ic">state</span> pour les sources mutables, <span class="ic">computed</span> pour les valeurs dérivées paresseuses, et <span class="ic">effect</span> pour les effets de bord suivis.',
+          "graph.copy2": "Les calculs remplacent leur ensemble de sources à chaque exécution. Les valeurs inchangées court-circuitent les tests d égalité, donc les abonnés ne reçoivent que les changements significatifs.",
+          "graph.callout": "la lecture collecte les sources. l écriture marque les dépendants comme sales. la possession reste visible.",
+          "ownership.title": "POSSESSION EXPLICITE",
+          "ownership.copy1": 'Les effets, valeurs calculées, watchers et callbacks de nettoyage peuvent appartenir à un <span class="ic">scope</span>. Un scope donne une durée de vie visible au travail réactif.',
+          "ownership.copy2": 'Le nettoyage est du Python ordinaire : enregistrez-le avec <span class="ic">on_cleanup</span>, arrêtez les ressources avec <span class="ic">dispose</span>, ou laissez le scope propriétaire les fermer.',
+          "watch.title": "SURVEILLEZ CE QUE VOUS VOULEZ DIRE",
+          "watch.copy1": '<span class="ic">watch</span> suit une source explicite et fournit <span class="ic">new</span>, <span class="ic">old</span> et un nettoyage optionnel. L égalité personnalisée garde les watchers de style sélecteur concentrés sur les changements significatifs. <span class="ic">batch</span> regroupe les mises à jour et flush les effets une seule fois.',
+          "watch.copy2": 'Quand les lectures ne doivent pas devenir des dépendances, utilisez <span class="ic">untrack</span> ou <span class="ic">peek</span>. Le graphe reste précis parce que la collecte des dépendances est visible.',
+          "watch.callout": "mises à jour déterministes, un flush, aucune surprise de scheduler.",
+          "api.title": "UNE PETITE SURFACE",
+          "api.copy1": 'L API publique est volontairement compacte. Le runtime utilise le typage structurel en interne et des génériques de style PEP 695 pour <span class="ic">State[T]</span> et <span class="ic">Computed[T]</span>.',
+          "api.table.api": "API",
+          "api.table.purpose": "But",
+          "api.table.state": "Créer un état réactif mutable.",
+          "api.table.computed": "Créer un état dérivé paresseux.",
+          "api.table.effect": "Exécuter un effet de bord avec suivi automatique des sources.",
+          "api.table.watch": "Surveiller une source explicite avec nouvelle valeur, ancienne valeur, égalité personnalisée et nettoyage.",
+          "api.table.readonly": "Exposer une vue en lecture seule d un état ou d un état calculé.",
+          "api.table.batch": "Regrouper les mises a jour et flush les effets une seule fois.",
+          "api.table.untrack": "Lire des valeurs reactives sans collecter de sources.",
+          "api.table.scope": "Posseder et arreter explicitement des ressources reactives.",
+          "example.title": "EXEMPLE DE PANIER",
+          "example.copy1": "L application exemple combine lignes de panier, validation de coupon, possibilité de checkout, nettoyage scoped, instantanés d analytics non suivis et mises à jour groupées.",
+          "example.copy2": "Elle reste volontairement du Python simple : dataclasses, dictionnaires, fonctions, et une couche réactive assez petite pour être inspectée d une traite.",
+          "example.callout": "source complète : examples/shopping_cart.py",
+          "roadmap.title": "FEUILLE DE ROUTE",
+          "roadmap.copy1": "L infrastructure de base est en place : dispose, untrack, peek, batch et cleanup.",
+          "roadmap.item1": '<span class="ic">scheduling</span> - schedulers d effects personnalisés, flush en file, next_tick',
+          "roadmap.item2": '<span class="ic">debugging</span> - gardes de type runtime, inspection des sources, inspection des abonnés',
+          "roadmap.item3": '<span class="ic">labels</span> - noms optionnels pour les states, valeurs calculées, effects et scopes',
+          "footer.api": "API",
+          "footer.example": "EXEMPLE",
+          "footer.github": "GITHUB",
+          "footer.issues": "ISSUES",
+          "footer.license": "~*~ st 0.6.0. licence MIT. ~*~",
+          "footer.tagline": "petit coeur. graphe typé. possession explicite.",
+        },
       };
 
       const languageButton = document.getElementById("language-button");
@@ -800,6 +848,11 @@ can_checkout = computed(
             button: "[ РУССКИЙ ]",
             htmlLang: "ru",
             title: "st - Минимальное реактивное состояние для Python",
+          },
+          fr: {
+            button: "[ FRANÇAIS ]",
+            htmlLang: "fr",
+            title: "st - État réactif minimal pour Python",
           },
         };
         const meta = languageMeta[language] || languageMeta.en;
