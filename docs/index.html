@@ -327,6 +327,7 @@
               <button type="button" data-language-option="en">[ ENGLISH ]</button>
               <button type="button" data-language-option="zh">[ 中文 ]</button>
               <button type="button" data-language-option="ja">[ 日本語 ]</button>
+              <button type="button" data-language-option="ru">[ РУССКИЙ ]</button>
             </div>
           </div>
         </nav>
@@ -724,6 +725,53 @@ can_checkout = computed(
           "footer.license": "~*~ st 0.6.0. MIT ライセンス。~*~",
           "footer.tagline": "小さなコア。型付きグラフ。明示的な所有権。",
         },
+        ru: {
+          "nav.api": "[ API ]",
+          "nav.example": "[ ПРИМЕР ]",
+          "nav.github": "[ GITHUB ]",
+          "hero.title": "МИНИМАЛЬНОЕ РЕАКТИВНОЕ СОСТОЯНИЕ ДЛЯ PYTHON",
+          "hero.copy1": '<span class="ic">st</span> - небольшой типизированный рантайм реактивного состояния для Python. Значения остаются обычными объектами с <span class="ic">.value</span>, производное состояние вычисляется лениво, а побочные эффекты принадлежат явно, без скрытой магии фреймворка.',
+          "hero.copy2": "Источники уведомляют вычисления, вычисления отслеживают свои источники, а области видимости делают владение видимым. Обновления по умолчанию синхронные и детерминированные, поэтому модель мышления остается близкой к написанному коду.",
+          "hero.callout": "ноль runtime-зависимостей. Python >= 3.13.",
+          "graph.title": "РЕАКТИВНЫЙ ГРАФ",
+          "graph.copy1": 'Реактивный граф строится из трех примитивов: <span class="ic">state</span> для изменяемых источников, <span class="ic">computed</span> для ленивых производных значений и <span class="ic">effect</span> для отслеживаемых побочных эффектов.',
+          "graph.copy2": "Вычисления заменяют набор источников при каждом запуске. Неизменившиеся значения коротко замыкаются проверкой равенства, поэтому подписчики получают только значимые изменения.",
+          "graph.callout": "чтение собирает источники. запись помечает зависимые значения грязными. владение остается видимым.",
+          "ownership.title": "ЯВНОЕ ВЛАДЕНИЕ",
+          "ownership.copy1": 'Эффекты, вычисляемые значения, наблюдатели и callbacks очистки могут принадлежать <span class="ic">scope</span>. Область видимости дает реактивной работе видимый срок жизни.',
+          "ownership.copy2": 'Очистка - это обычный Python: зарегистрируйте ее через <span class="ic">on_cleanup</span>, остановите ресурсы с помощью <span class="ic">dispose</span> или позвольте закрыть их владеющей области видимости.',
+          "watch.title": "НАБЛЮДАЙТЕ ИМЕННО ЗА ТЕМ, ЧТО НУЖНО",
+          "watch.copy1": '<span class="ic">watch</span> отслеживает явный источник и сообщает <span class="ic">new</span>, <span class="ic">old</span> и необязательную очистку. Пользовательское равенство помогает selector-style наблюдениям фокусироваться на значимых изменениях. <span class="ic">batch</span> объединяет обновления и выполняет flush эффектов один раз.',
+          "watch.copy2": 'Когда чтение не должно становиться зависимостью, используйте <span class="ic">untrack</span> или <span class="ic">peek</span>. Граф остается точным, потому что сбор зависимостей виден явно.',
+          "watch.callout": "детерминированные обновления, один flush, без сюрпризов планировщика.",
+          "api.title": "НЕБОЛЬШАЯ ПОВЕРХНОСТЬ API",
+          "api.copy1": 'Публичный API намеренно компактный. Внутри рантайм использует структурную типизацию и generics в стиле PEP 695 для <span class="ic">State[T]</span> и <span class="ic">Computed[T]</span>.',
+          "api.table.api": "API",
+          "api.table.purpose": "Назначение",
+          "api.table.state": "Создать изменяемое реактивное состояние.",
+          "api.table.computed": "Создать ленивое производное состояние.",
+          "api.table.effect": "Запустить побочный эффект с автоматическим отслеживанием источников.",
+          "api.table.watch": "Наблюдать за явным источником с новым и старым значением, пользовательским равенством и очисткой.",
+          "api.table.readonly": "Открыть read-only представление состояния или вычисляемого состояния.",
+          "api.table.batch": "Объединить обновления и выполнить flush эффектов один раз.",
+          "api.table.untrack": "Читать реактивные значения без сбора источников.",
+          "api.table.scope": "Явно владеть реактивными ресурсами и останавливать их.",
+          "example.title": "ПРИМЕР С КОРЗИНОЙ",
+          "example.copy1": "Пример приложения объединяет позиции корзины, проверку купона, готовность к checkout, scoped cleanup, untracked analytics snapshots и пакетные обновления.",
+          "example.copy2": "Он намеренно написан на простом Python: dataclasses, словари, функции и реактивный слой, достаточно маленький, чтобы изучить его за один раз.",
+          "example.callout": "полный исходный код: examples/shopping_cart.py",
+          "roadmap.title": "ПЛАН",
+          "roadmap.copy1": "Базовая инфраструктура уже готова: dispose, untrack, peek, batch и cleanup.",
+          "roadmap.item1": '<span class="ic">scheduling</span> - пользовательские планировщики effect, queued flush, next_tick',
+          "roadmap.item2": '<span class="ic">debugging</span> - runtime type guards, проверка источников, проверка подписчиков',
+          "roadmap.item3": '<span class="ic">labels</span> - необязательные имена для state, computed values, effects и scopes',
+          "footer.api": "API",
+          "footer.example": "ПРИМЕР",
+          "footer.github": "GITHUB",
+          "footer.issues": "ISSUES",
+          "footer.license": "~*~ st 0.6.0. MIT license. ~*~",
+          "footer.tagline": "маленькое ядро. типизированный граф. явное владение.",
+        },
       };
 
       const languageButton = document.getElementById("language-button");
@@ -747,6 +795,11 @@ can_checkout = computed(
             button: "[ 日本語 ]",
             htmlLang: "ja",
             title: "st - Python のための最小限のリアクティブ状態",
+          },
+          ru: {
+            button: "[ РУССКИЙ ]",
+            htmlLang: "ru",
+            title: "st - Минимальное реактивное состояние для Python",
           },
         };
         const meta = languageMeta[language] || languageMeta.en;
