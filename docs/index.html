@@ -329,6 +329,7 @@
               <button type="button" data-language-option="ja">[ 日本語 ]</button>
               <button type="button" data-language-option="ru">[ РУССКИЙ ]</button>
               <button type="button" data-language-option="fr">[ FRANÇAIS ]</button>
+              <button type="button" data-language-option="de">[ DEUTSCH ]</button>
             </div>
           </div>
         </nav>
@@ -820,6 +821,53 @@ can_checkout = computed(
           "footer.license": "~*~ st 0.6.0. licence MIT. ~*~",
           "footer.tagline": "petit coeur. graphe typé. possession explicite.",
         },
+        de: {
+          "nav.api": "[ API ]",
+          "nav.example": "[ BEISPIEL ]",
+          "nav.github": "[ GITHUB ]",
+          "hero.title": "MINIMALER REAKTIVER STATE FÜR PYTHON",
+          "hero.copy1": '<span class="ic">st</span> ist eine kleine, typisierte Runtime für reaktiven State in Python. Werte sind normale Objekte mit <span class="ic">.value</span>, abgeleiteter State ist lazy, und Seiteneffekte werden explizit besessen statt hinter Framework-Magie versteckt.',
+          "hero.copy2": "Quellen benachrichtigen Berechnungen, Berechnungen verfolgen ihre Quellen, und Scopes machen Besitz sichtbar. Updates sind standardmäßig synchron und deterministisch, sodass das mentale Modell nah am geschriebenen Code bleibt.",
+          "hero.callout": "keine Runtime-Abhängigkeiten. Python >= 3.13.",
+          "graph.title": "DER GRAPH",
+          "graph.copy1": 'Drei Primitive bilden den reaktiven Graphen: <span class="ic">state</span> für veränderliche Quellen, <span class="ic">computed</span> für lazy abgeleitete Werte und <span class="ic">effect</span> für verfolgte Seiteneffekte.',
+          "graph.copy2": "Berechnungen ersetzen bei jedem Lauf ihre Quellenmenge. Unveränderte Werte werden durch Gleichheitsprüfungen kurzgeschlossen, sodass Abonnenten nur sinnvolle Änderungen erhalten.",
+          "graph.callout": "Lesen sammelt Quellen. Schreiben markiert Abhängige als dirty. Besitz bleibt sichtbar.",
+          "ownership.title": "EXPLIZITER BESITZ",
+          "ownership.copy1": 'Effekte, berechnete Werte, Watcher und Cleanup-Callbacks können zu einem <span class="ic">scope</span> gehören. Ein Scope gibt reaktiver Arbeit eine sichtbare Lebensdauer.',
+          "ownership.copy2": 'Cleanup ist normales Python: mit <span class="ic">on_cleanup</span> registrieren, Ressourcen mit <span class="ic">dispose</span> stoppen oder den besitzenden Scope sie schließen lassen.',
+          "watch.title": "BEOBACHTE, WAS GEMEINT IST",
+          "watch.copy1": '<span class="ic">watch</span> verfolgt eine explizite Quelle und meldet <span class="ic">new</span>, <span class="ic">old</span> sowie optionales Cleanup. Eigene Gleichheit hält selector-style Watcher auf sinnvolle Änderungen fokussiert. <span class="ic">batch</span> bündelt Updates und flusht Effekte einmal.',
+          "watch.copy2": 'Wenn Lesezugriffe keine Abhängigkeiten werden sollen, nutze <span class="ic">untrack</span> oder <span class="ic">peek</span>. Der Graph bleibt präzise, weil Dependency Collection sichtbar ist.',
+          "watch.callout": "deterministische Updates, ein Flush, keine Scheduler-Überraschung.",
+          "api.title": "EINE KLEINE OBERFLÄCHE",
+          "api.copy1": 'Die öffentliche API ist absichtlich kompakt. Die Runtime nutzt intern strukturelle Typisierung und Generics im PEP-695-Stil für <span class="ic">State[T]</span> und <span class="ic">Computed[T]</span>.',
+          "api.table.api": "API",
+          "api.table.purpose": "Zweck",
+          "api.table.state": "Veränderlichen reaktiven State erstellen.",
+          "api.table.computed": "Lazy abgeleiteten State erstellen.",
+          "api.table.effect": "Einen Seiteneffekt mit automatischem Quellen-Tracking ausführen.",
+          "api.table.watch": "Eine explizite Quelle mit neuem Wert, altem Wert, eigener Gleichheit und Cleanup beobachten.",
+          "api.table.readonly": "Eine schreibgeschützte Ansicht von State oder Computed State bereitstellen.",
+          "api.table.batch": "Updates bündeln und Effekte einmal flushen.",
+          "api.table.untrack": "Reaktive Werte lesen, ohne Quellen zu sammeln.",
+          "api.table.scope": "Reaktive Ressourcen explizit besitzen und stoppen.",
+          "example.title": "SHOPPING-CART-BEISPIEL",
+          "example.copy1": "Die Beispiel-App kombiniert Warenkorbzeilen, Coupon-Validierung, Checkout-Bereitschaft, scoped Cleanup, untracked Analytics-Snapshots und gebündelte Updates.",
+          "example.copy2": "Sie ist absichtlich schlichtes Python: dataclasses, Dictionaries, Funktionen und eine reaktive Schicht, die klein genug ist, um sie in einem Durchgang zu prüfen.",
+          "example.callout": "vollständiger Quellcode: examples/shopping_cart.py",
+          "roadmap.title": "ROADMAP",
+          "roadmap.copy1": "Die Kerninfrastruktur ist vorhanden: dispose, untrack, peek, batch und cleanup.",
+          "roadmap.item1": '<span class="ic">scheduling</span> - eigene Effect-Scheduler, queued flush, next_tick',
+          "roadmap.item2": '<span class="ic">debugging</span> - Runtime-Type-Guards, Quelleninspektion, Subscriber-Inspektion',
+          "roadmap.item3": '<span class="ic">labels</span> - optionale Namen für State, berechnete Werte, Effekte und Scopes',
+          "footer.api": "API",
+          "footer.example": "BEISPIEL",
+          "footer.github": "GITHUB",
+          "footer.issues": "ISSUES",
+          "footer.license": "~*~ st 0.6.0. MIT-lizenziert. ~*~",
+          "footer.tagline": "kleiner Kern. typisierter Graph. expliziter Besitz.",
+        },
       };
 
       const languageButton = document.getElementById("language-button");
@@ -853,6 +901,11 @@ can_checkout = computed(
             button: "[ FRANÇAIS ]",
             htmlLang: "fr",
             title: "st - État réactif minimal pour Python",
+          },
+          de: {
+            button: "[ DEUTSCH ]",
+            htmlLang: "de",
+            title: "st - Minimaler reaktiver State für Python",
           },
         };
         const meta = languageMeta[language] || languageMeta.en;
