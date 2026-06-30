@@ -330,6 +330,7 @@
               <button type="button" data-language-option="ru">[ РУССКИЙ ]</button>
               <button type="button" data-language-option="fr">[ FRANÇAIS ]</button>
               <button type="button" data-language-option="de">[ DEUTSCH ]</button>
+              <button type="button" data-language-option="ko">[ 한국어 ]</button>
             </div>
           </div>
         </nav>
@@ -868,6 +869,53 @@ can_checkout = computed(
           "footer.license": "~*~ st 0.6.0. MIT-lizenziert. ~*~",
           "footer.tagline": "kleiner Kern. typisierter Graph. expliziter Besitz.",
         },
+        ko: {
+          "nav.api": "[ API ]",
+          "nav.example": "[ 예제 ]",
+          "nav.github": "[ GITHUB ]",
+          "hero.title": "PYTHON을 위한 최소한의 반응형 상태",
+          "hero.copy1": '<span class="ic">st</span>는 Python을 위한 작고 타입이 있는 반응형 상태 런타임입니다. 값은 <span class="ic">.value</span>를 가진 평범한 객체이고, 파생 상태는 지연 평가되며, 부수 효과는 프레임워크 마법 뒤에 숨지 않고 명시적으로 소유됩니다.',
+          "hero.copy2": "소스는 계산에 알리고, 계산은 자신의 소스를 추적하며, 스코프는 소유권을 눈에 보이게 만듭니다. 업데이트는 기본적으로 동기적이고 결정적이어서, 사고 모델이 작성한 코드에 가깝게 유지됩니다.",
+          "hero.callout": "런타임 의존성 없음. Python >= 3.13.",
+          "graph.title": "반응형 그래프",
+          "graph.copy1": '세 가지 원시 요소가 반응형 그래프를 이룹니다. 변경 가능한 소스인 <span class="ic">state</span>, 지연 평가되는 파생 값인 <span class="ic">computed</span>, 추적되는 부수 효과인 <span class="ic">effect</span>입니다.',
+          "graph.copy2": "계산은 실행될 때마다 자신의 소스 집합을 교체합니다. 변경되지 않은 값은 동등성 검사로 단락되므로, 구독자는 의미 있는 변경만 받습니다.",
+          "graph.callout": "읽기는 소스를 수집합니다. 쓰기는 의존 대상을 dirty로 표시합니다. 소유권은 계속 보입니다.",
+          "ownership.title": "명시적 소유권",
+          "ownership.copy1": '효과, 계산 값, watcher, 정리 콜백은 <span class="ic">scope</span>에 속할 수 있습니다. 스코프는 반응형 작업의 수명을 눈에 보이게 합니다.',
+          "ownership.copy2": '정리는 평범한 Python입니다. <span class="ic">on_cleanup</span>으로 등록하고, <span class="ic">dispose</span>로 리소스를 중지하거나, 소유한 스코프가 닫도록 하면 됩니다.',
+          "watch.title": "의도한 대상을 감시",
+          "watch.copy1": '<span class="ic">watch</span>는 명시적인 소스를 추적하고 <span class="ic">new</span>, <span class="ic">old</span>, 선택적 정리를 보고합니다. 사용자 정의 동등성은 selector-style watcher가 의미 있는 변경에 집중하도록 돕습니다. <span class="ic">batch</span>는 업데이트를 모아 효과를 한 번만 flush합니다.',
+          "watch.copy2": '읽기가 의존성이 되면 안 될 때는 <span class="ic">untrack</span> 또는 <span class="ic">peek</span>를 사용합니다. 의존성 수집이 눈에 보이는 일이므로 그래프는 정확하게 유지됩니다.',
+          "watch.callout": "결정적 업데이트, 한 번의 flush, 스케줄러 surprise 없음.",
+          "api.title": "작은 API 표면",
+          "api.copy1": '공개 API는 의도적으로 작게 유지됩니다. 런타임은 내부적으로 구조적 타이핑을 사용하고, <span class="ic">State[T]</span>와 <span class="ic">Computed[T]</span>에는 PEP 695 스타일 제네릭을 사용합니다.',
+          "api.table.api": "API",
+          "api.table.purpose": "목적",
+          "api.table.state": "변경 가능한 반응형 상태를 만듭니다.",
+          "api.table.computed": "지연 평가되는 파생 상태를 만듭니다.",
+          "api.table.effect": "자동 소스 추적과 함께 부수 효과를 실행합니다.",
+          "api.table.watch": "명시적인 소스를 새 값, 이전 값, 사용자 정의 동등성, 정리와 함께 감시합니다.",
+          "api.table.readonly": "상태 또는 계산 상태의 읽기 전용 뷰를 노출합니다.",
+          "api.table.batch": "업데이트를 모으고 효과를 한 번만 flush합니다.",
+          "api.table.untrack": "소스를 수집하지 않고 반응형 값을 읽습니다.",
+          "api.table.scope": "반응형 리소스를 명시적으로 소유하고 중지합니다.",
+          "example.title": "쇼핑 카트 예제",
+          "example.copy1": "예제 앱은 카트 라인, 쿠폰 검증, 체크아웃 가능 여부, 스코프 정리, 추적하지 않는 analytics snapshot, 배치 업데이트를 결합합니다.",
+          "example.copy2": "의도적으로 평범한 Python입니다. dataclass, 딕셔너리, 함수, 그리고 한 번에 살펴볼 수 있을 만큼 작은 반응형 레이어로 구성됩니다.",
+          "example.callout": "전체 소스: examples/shopping_cart.py",
+          "roadmap.title": "로드맵",
+          "roadmap.copy1": "핵심 인프라는 준비되어 있습니다: dispose, untrack, peek, batch, cleanup.",
+          "roadmap.item1": '<span class="ic">scheduling</span> - 사용자 정의 effect 스케줄러, queued flush, next_tick',
+          "roadmap.item2": '<span class="ic">debugging</span> - runtime type guard, 소스 검사, 구독자 검사',
+          "roadmap.item3": '<span class="ic">labels</span> - state, computed value, effect, scope에 대한 선택적 이름',
+          "footer.api": "API",
+          "footer.example": "예제",
+          "footer.github": "GITHUB",
+          "footer.issues": "ISSUES",
+          "footer.license": "~*~ st 0.6.0. MIT 라이선스. ~*~",
+          "footer.tagline": "작은 코어. 타입 그래프. 명시적 소유권.",
+        },
       };
 
       const languageButton = document.getElementById("language-button");
@@ -906,6 +954,11 @@ can_checkout = computed(
             button: "[ DEUTSCH ]",
             htmlLang: "de",
             title: "st - Minimaler reaktiver State für Python",
+          },
+          ko: {
+            button: "[ 한국어 ]",
+            htmlLang: "ko",
+            title: "st - Python을 위한 최소한의 반응형 상태",
           },
         };
         const meta = languageMeta[language] || languageMeta.en;
